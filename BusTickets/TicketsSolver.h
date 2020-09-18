@@ -39,11 +39,14 @@ private:
 public:
 	typedef const func<str_token> FLAG[];
 
+	//используйте данный флаг если нужно вывести выражение в обратной польской нотации
 	const static FLAG REVERSED_NOTATION;
+
+	//используйте данный флаг если нужно вывести выражение в нормальной нотации. Стоит по-умолчанию.
 	const static FLAG NORMAL_NOTATION;
 
 	//Конструктор класса TicketsSolver. ОБРАТИТЕ ВНИМАНИЕ! goal >= 0 и n > 1 !
-	TicketsSolver(size_t n, /*unsigned*/ Rational goal, const int *data);
+	TicketsSolver(size_t n, /*unsigned*/ Rational goal, const unsigned *data);
 	
 	virtual ~TicketsSolver();
 	
@@ -97,7 +100,7 @@ private:
 	token* opers;
 
 	//создаём массив data с которым будем работать
-	void init_data(const int* int_data);
+	void init_data(const unsigned* int_data);
 
 	//перед поиском решений производим инициализацию массива
 	void init_opers() noexcept;
@@ -138,7 +141,7 @@ private:
 	//eval_list - это лист на котором будут происходить все нужные нам вычисления
 	Rational* eval_list;
 	//функция производит нужные вычисления если происходит деление на 0 возвращает INF
-	Rational evaluate() const noexcept;
+	Rational evaluate() const noexcept; //если промежуточный результат отрицательный - возвращает -1
 
 	//копирует из data в eval_list
 	void init_list() const noexcept;

@@ -1,13 +1,15 @@
 #include "TicketsSolver.h"
 
-#include <numeric>
 #include <iostream>
 
-#define length 6
+#define length 8
 
 int main() {
-	int arr[length] = { 9, 9, 9, 9, 9, 9 };
-	TicketsSolver ts(length, 0, arr);
+	unsigned arr[length] = { 9, 9, 9, 9, 9, 9, 9, 9};
+	TicketsSolver ts(length, 100, arr);
 	ts.all_solutions(std::cout);
 	return 0;
 }
+
+
+//ещ нужно сделать невозможным (-+)*

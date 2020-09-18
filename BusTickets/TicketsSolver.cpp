@@ -41,11 +41,12 @@
 
 
 
-TicketsSolver::TicketsSolver(size_t n, Rational goal, const int* int_data)
+TicketsSolver::TicketsSolver(size_t n, Rational goal, const unsigned* int_data)
 	:size(n), opers_size(n - 1), goal(goal)
 {
 	if (goal.is_negative()) throw std::invalid_argument("TicketsSolver : goal is negative");
 	if (size < 2) throw std::invalid_argument("TicketsSolver : size < 2 => no operators");
+	if (!goal.IS_NUMBER())throw std::invalid_argument("TicketsSolver: goal is not a number!");
 
 	data = new Rational[size];
 	opers = new token[opers_size];
@@ -135,10 +136,10 @@ const TicketsSolver::func<Rational> TicketsSolver::rational_lib[] = {
 //методы инициализации и реинициализации массива операторов
 
 
-inline void TicketsSolver::init_data(const int* int_data)
+inline void TicketsSolver::init_data(const unsigned* int_data)
 {
 	Rational* d = data, *const end = data + size;
-	for (const int* i = int_data; d != end; d++, i++) *d = Rational(*i);
+	for (const auto* i = int_data; d != end; d++, i++) *d = Rational(*i);
 }
 
 inline void TicketsSolver::init_opers() noexcept
@@ -187,20 +188,20 @@ inline void TicketsSolver::reinit_pos(size_t begin, size_t end, const size_t min
 
 inline bool TicketsSolver::are_signs_valid() const noexcept
 {
-	return opers->sign < OPERATORS_COUNT;
+	return (opers+opers_size-1)->sign < OPERATORS_COUNT;
 }
 
 
 inline void TicketsSolver::next_sign_configuration() noexcept
 {
-	auto i = opers + opers_size - 1;
-	auto i_prev = i - 1;
-	auto const i_end = opers;
+	auto i = opers;
+	auto i_next = i + 1;
+	auto const i_end = opers+opers_size - 1;
 
 	i->sign++;
-	for (; i != i_end; i--, i_prev--) {
+	for (; i != i_end; i++, i_next++) {
 		if (i->sign == OPERATORS_COUNT) {
-			i_prev->sign++;
+			i_next->sign++;
 			i->sign = 0;
 		} else {
 			return;
@@ -358,13 +359,16 @@ inline Rational TicketsSolver::evaluate() const noexcept
 		auto a_iter = b_iter - 1;
 		if (i->sign == DIVIDE && b_iter->IS_NULL()) return Rational::INF;
 		*b_iter = rational_lib[i->sign](*a_iter, *b_iter);
+		//если пром. результат отрицательный, значит 
+		//если один из знаков суммы поменять на другой знак суммы  - получится положительный результат
+		if (b_iter->is_negative()) return Rational(-1);
 		move(a_iter, _begin);
 	}
 	
 	return eval_list[opers_size]; //возвращает последнее оставшееся значение
 }
 
-void TicketsSolver::init_list() const noexcept
+inline void TicketsSolver::init_list() const noexcept
 {
 	Rational* i = eval_list;
 	Rational* const end = eval_list + size;
@@ -373,7 +377,7 @@ void TicketsSolver::init_list() const noexcept
 }
 
 
-void TicketsSolver::move(Rational *a, Rational * const _begin) const noexcept
+inline void TicketsSolver::move(Rational *a, Rational * const _begin) const noexcept
 {
 	for (Rational* for_copy = a - 1; for_copy >= _begin; a--, for_copy--) {
 		*a = *for_copy;

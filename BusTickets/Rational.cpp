@@ -99,17 +99,17 @@ bool Rational::IS_INF() const noexcept
 
 bool Rational::IS_NAN() const noexcept
 {
-	return 0 == numer && 0 == denumer;
+	return 0 == numer && 0u == denumer;
 }
 
 bool Rational::IS_NULL() const noexcept
 {
-	return 0 == numer && 0 != denumer;
+	return 0 == numer && 0u != denumer;
 }
 
-inline bool Rational::IS_NUMBER() const noexcept
+bool Rational::IS_NUMBER() const noexcept
 {
-	return  0 != denumer;
+	return  0u != denumer;
 }
 
 
