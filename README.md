@@ -18,16 +18,16 @@
 	поэтому при попытке передать отрицательный знак 
 	вернется ошибка invalid_argument.
   
-  Структура класса TicketsSolver {
-      permutator,
-      evaluator,
-      str_converter,
-      ...
-      some public methods,
-      ...
-      
-      some private data
-    }
+  Структура класса TicketsSolver;
+	  TicketsSolver {
+	      permutator,
+	      evaluator,
+	      str_converter,
+	      ...
+	      some public methods,
+	      ...
+	      some private data
+	    }
       
    TicketsSolver хранит конфигурацию операторов, которая меняется при переборе, к которой можно использовать методы классов permutator, evaluator, str_converter.
    
