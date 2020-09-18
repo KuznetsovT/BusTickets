@@ -1,24 +1,24 @@
 #include "Rational.h"
 #include <numeric>
 /*
-Файл с реализацией класса рациональных чисел.
+Р¤Р°Р№Р» СЃ СЂРµР°Р»РёР·Р°С†РёРµР№ РєР»Р°СЃСЃР° СЂР°С†РёРѕРЅР°Р»СЊРЅС‹С… С‡РёСЃРµР».
 
-Используем std::gcd и std::lcm из файла <numeric>
+РСЃРїРѕР»СЊР·СѓРµРј std::gcd Рё std::lcm РёР· С„Р°Р№Р»Р° <numeric>
 
-!!!!!!!!!!!!!!НЕ РАБОТАЕТ БЕЗ СТАНДАРТА С++17!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!РќР• Р РђР‘РћРўРђР•Рў Р‘Р•Р— РЎРўРђРќР”РђР РўРђ РЎ++17!!!!!!!!!!!!!!!!!!!!!!!!
 */
 
 const Rational Rational::INF = Rational(1,0);
 
-//КОНСТРУКТОРЫ//
+//РљРћРќРЎРўР РЈРљРўРћР Р«//
 
-//проверки дроби на сокращаемость не происходит!
-//используйте make_Rational для создания несократимой дроби
+//РїСЂРѕРІРµСЂРєРё РґСЂРѕР±Рё РЅР° СЃРѕРєСЂР°С‰Р°РµРјРѕСЃС‚СЊ РЅРµ РїСЂРѕРёСЃС…РѕРґРёС‚!
+//РёСЃРїРѕР»СЊР·СѓР№С‚Рµ make_Rational РґР»СЏ СЃРѕР·РґР°РЅРёСЏ РЅРµСЃРѕРєСЂР°С‚РёРјРѕР№ РґСЂРѕР±Рё
 Rational::Rational(int numer, unsigned denumer) noexcept
 	: numer(numer), denumer(denumer) {}
 
 
-//используйте данную функцию для создания несократимой дроби
+//РёСЃРїРѕР»СЊР·СѓР№С‚Рµ РґР°РЅРЅСѓСЋ С„СѓРЅРєС†РёСЋ РґР»СЏ СЃРѕР·РґР°РЅРёСЏ РЅРµСЃРѕРєСЂР°С‚РёРјРѕР№ РґСЂРѕР±Рё
 Rational Rational::make_Rational(int numer, unsigned denumer) noexcept
 {
 	unsigned gcd = std::gcd(numer, denumer);
@@ -26,7 +26,7 @@ Rational Rational::make_Rational(int numer, unsigned denumer) noexcept
 }
 
 
-//оператор вывода Rational
+//РѕРїРµСЂР°С‚РѕСЂ РІС‹РІРѕРґР° Rational
 std::ostream& operator<<(std::ostream& out, const Rational& r) noexcept
 {
 	if (r.denumer != 1) {
