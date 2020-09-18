@@ -8,7 +8,8 @@
 !!!!!!!!!!!!!!НЕ РАБОТАЕТ БЕЗ СТАНДАРТА С++17!!!!!!!!!!!!!!!!!!!!!!!!
 */
 
-const Rational Rational::INF = Rational(1,0);
+const Rational Rational::INF = Rational(1, 0);
+const Rational Rational::NaN = Rational(0, 0);
 
 //КОНСТРУКТОРЫ//
 

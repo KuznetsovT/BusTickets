@@ -48,22 +48,40 @@ public:
 	//Конструктор класса TicketsSolver. ОБРАТИТЕ ВНИМАНИЕ! goal >= 0 и n > 1 !
 	TicketsSolver(size_t n, /*unsigned*/ Rational goal, const unsigned *data);
 	
-	virtual ~TicketsSolver();
+	~TicketsSolver();
+
+	//устанавливает новую цель
+	void set_new_goal(Rational goal) noexcept;
+
+	//устанавливает новые числа для решения
+	void set_new_data(const unsigned * data);
+	
+	//сбрасывает внутренную конфигурацию операторов
+	void reset() noexcept;
+
+	//возвращает строковое представление текущей конфигурации операторов
+	std::string to_str(const FLAG NOTATION = NORMAL_NOTATION) const noexcept;
+
+	//вычисляет выражение по текущей конфигурации записанной в oper. Если в opers  - фигня, возвращает NaN
+	Rational evaluate() const noexcept;
 	
 	//сбрасывает конфигурацию, возвращает первое найденное решение, если решений нет, возвращает пустую строку
-	std::string first_solution(FLAG notation = NORMAL_NOTATION) noexcept;
-	//возвращает следующее решение, хранит получившуюся конфигурацию, если решений нет, возвращает пустую строку
-	std::string next_solution(FLAG notation = NORMAL_NOTATION) noexcept;
-	
-	void all_solutions(std::ostream& out, FLAG notation = NORMAL_NOTATION)noexcept;
+	std::string first_solution(const FLAG notation = NORMAL_NOTATION) noexcept;
 
-private:
+
+	
+	unsigned count_of_solutions() noexcept;
+
+	//записывает все решения в out, выводит количество записанных решений
+	unsigned all_solutions(std::ostream& out, FLAG notation = NORMAL_NOTATION)noexcept;
+
 	//сбрасывает конфигурацию операторов, ищет первое решение, возвращает true если находит
 	bool find_first_solution() noexcept;
 
+	//хранит конфигурацию следующего решения, если решений нет,возвращает false
+	bool next_solution() noexcept;
 
-	void all_solutions();
-
+private:
 	/*
 	* Чтобы не отслеживать унарный минус
 	* для простоты используем список из 5 операторов
@@ -100,8 +118,8 @@ private:
 
 
 	const size_t size, opers_size; //opers_size = size-1
-	Rational goal;                 //значение которое нужно получить
-
+public:	Rational goal;                 //значение которое нужно получить
+private:
 	//массив рациональных чисел между которыми нужно расставить знаки арифметических действий
 	Rational* data = nullptr;
 	
@@ -116,7 +134,7 @@ private:
 
 
 	//ПЕРЕБОР ОПЕРАТОРОВ
-
+public:
 	//структура занимающаяся перебором операторов
 	struct Permutator {
 	private:
@@ -127,13 +145,14 @@ private:
 
 		//перед поиском решений производим инициализацию массива
 		void init_opers() const noexcept;
-
+	private:
 		//эти функции проводят частичную реинициализацию массива
 		void reinit_signs(const size_t begin, const size_t end) const noexcept;
 		void reinit_pos(const size_t begin, const size_t end) const noexcept;
-	private:
 		void reinit_pos(const size_t begin, const size_t end, const size_t min_value) const noexcept;
-
+	public:
+		void reinit_signs() const noexcept;
+		void reinit_pos() const noexcept;
 	public:
 		//cмотрит что настоящая конфигурация знаков валидна, т.е все элементы от 0 до OPERATOR_COUNT
 		bool are_signs_valid() const noexcept;
@@ -174,8 +193,11 @@ private:
 		//функция производит нужные вычисления если происходит деление на 0 возвращает INF
 		Rational evaluate() const noexcept; //если промежуточный результат отрицательный - возвращает -1
 		
+		//честно до конца производит все вычисления
+		Rational evaluate_honestly() const noexcept;
+
 		//связывает Evaluator и TicketsSolver а так же производит выделение памяти по лист
-		void init(TicketsSolver* ts);
+		friend void init(TicketsSolver*, Evaluator& e);
 		virtual ~Evaluator();
 
 	private:
@@ -187,12 +209,14 @@ private:
 
 	} evaluator; //у каждого TicketsSolver есть свой Evaluator
 
+private:
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	//Реализация строкового представления
 	//Алгоритм получения строки такой же как и при генерации числа.
-
+private:
 	//у каждого выражения есть свой id
 	typedef unsigned str_id;
 
@@ -209,7 +233,7 @@ private:
 		std::string str;
 		str_id id = EXPR;
 	};
-
+public:
 	struct StrConverter {
 	private:
 		//массив на котором будет происходить генерация выходной строки
@@ -222,7 +246,7 @@ private:
 		std::string convert(const FLAG notation = NORMAL_NOTATION) const noexcept;
 
 		//cвязываем обьект типа StrConverter с обьектом типа TicketsSolver
-		void init(TicketsSolver* ts);
+		friend void init(TicketsSolver* ts, StrConverter& sc);
 		~StrConverter();
 	private:
 		//создаёт начальное представление чисел
@@ -233,12 +257,19 @@ private:
 
 	} str_converter;  //у каждого TicketsSolver есть свой StrConverter
 
+	//связывает Evaluator и TicketsSolver а так же производит выделение памяти по лист
+	friend void init(TicketsSolver*, Evaluator& e);
 
+	//cвязываем обьект типа StrConverter с обьектом типа TicketsSolver
+	friend void init(TicketsSolver* ts, StrConverter& sc);
 };
 
 
+//связывает Evaluator и TicketsSolver а так же производит выделение памяти по лист
+void init(TicketsSolver*, TicketsSolver::Evaluator& e);
 
-
+//cвязываем обьект типа StrConverter с обьектом типа TicketsSolver
+void init(TicketsSolver* ts, TicketsSolver::StrConverter& sc);
 
 
 

@@ -42,6 +42,7 @@ struct Rational {
 	Rational reversed() const;
 
 	const static Rational INF;
+	const static Rational NaN;
 
 	bool is_negative() const noexcept;
 	bool IS_INF() const noexcept;

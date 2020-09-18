@@ -52,8 +52,8 @@ TicketsSolver::TicketsSolver(size_t n, Rational goal, const unsigned* int_data)
 	opers = new token[opers_size];
 
 	permutator = Permutator(this);
-	evaluator.init(this);
-	str_converter.init(this);
+	init(this, evaluator);
+	init(this, str_converter);
 
 	init_data(int_data);
 	permutator.init_opers();
@@ -66,47 +66,94 @@ TicketsSolver::~TicketsSolver()
 	delete[] opers;
 }
 
+//устанавливает новую цель, не сбрасывает конфигурацию операторов
+void TicketsSolver::set_new_goal(Rational goal) noexcept { this->goal = goal; }
+
+//устанавливает новое значение билетика
+void TicketsSolver::set_new_data(const unsigned* data) { init_data(data); }
+
+//сбрасывает конфигурацию операторов, поиск нужно начинать заново=(
+void TicketsSolver::reset() noexcept
+{
+	permutator.init_opers();
+}
+
+std::string TicketsSolver::to_str(const TicketsSolver::FLAG NOTATION) const noexcept
+{
+	if (permutator.are_signs_valid() && permutator.are_poses_valid()) return str_converter.convert(NOTATION);
+	else return std::string();
+}
+
+Rational TicketsSolver::evaluate() const noexcept
+{
+	if(permutator.are_signs_valid() && permutator.are_poses_valid()) return evaluator.evaluate_honestly();
+	else return Rational::NaN;
+}
+
+
+//макрос для написания методов вида: сделай expression для каждого решения /*чтобы получить первое решение, достаточно вставить return в expression*/
+#define FOR_ALL_SOLUTIONS_(__EXPRESSION__)													\
+{																							\
+																							\
+	for (permutator.reinit_signs();															\
+		permutator.are_signs_valid();														\
+		permutator.next_sign_configuration()) {												\
+																							\
+		permutator.reinit_pos();															\
+		while (permutator.is_doubled()) permutator.next_operators_permutation();			\
+		while (permutator.are_poses_valid()) {												\
+			if (goal == evaluator.evaluate()) { __EXPRESSION__ }							\
+			do permutator.next_operators_permutation(); while (permutator.is_doubled());	\
+		}																					\
+																							\
+	}																						\
+}																							\
+
+
 
 std::string TicketsSolver::first_solution(FLAG notation) noexcept
 {
-	return (find_first_solution() == true) ? str_converter.convert(notation) : std::string();
+	FOR_ALL_SOLUTIONS_(return str_converter.convert();)
+	return std::string();
 }
 
-//PROBLEM REWRITE!!!
-std::string TicketsSolver::next_solution(FLAG notation) noexcept
+
+bool TicketsSolver::next_solution() noexcept
 {
-	if (!permutator.are_signs_valid()) return std::string();
+	if (!permutator.are_signs_valid()) return false;
 	permutator.next_operators_permutation();
 	do {
 		while (permutator.is_doubled()) permutator.next_operators_permutation();
 		while (permutator.are_poses_valid()) {
-			if (goal == evaluator.evaluate()) return str_converter.convert(NORMAL_NOTATION);		
+			if (goal == evaluator.evaluate()) return true;
 			do permutator.next_operators_permutation(); while (permutator.is_doubled());
 		}
 		permutator.next_sign_configuration();
-		if (!permutator.are_signs_valid()) return std::string();
-		permutator.reinit_pos(0, opers_size);
+		if (!permutator.are_signs_valid()) return false;
+		permutator.reinit_pos();
 	} while (true);
 
 }
 
-
-void TicketsSolver::all_solutions(std::ostream& out, FLAG notation) noexcept
+unsigned TicketsSolver::count_of_solutions() noexcept
 {
-	for (permutator.reinit_signs(0, opers_size); 
-		permutator.are_signs_valid(); 
-		permutator.next_sign_configuration()) {
+	unsigned count = 0;
+	FOR_ALL_SOLUTIONS_(count++;)
+	return count;
+}
 
-		permutator.reinit_pos(0, opers_size);
-		while (permutator.is_doubled()) permutator.next_operators_permutation();
-		while (permutator.are_poses_valid()) {
-			if (goal == evaluator.evaluate()) {
-				out << " " << goal << " = " << str_converter.convert(notation) << std::endl;
-			}
-			do permutator.next_operators_permutation(); while (permutator.is_doubled());
-		}
+unsigned TicketsSolver::all_solutions(std::ostream& out, FLAG notation) noexcept
+{
+	unsigned count = 0;
+	FOR_ALL_SOLUTIONS_(count++;  out << " " << goal << " = " << str_converter.convert(notation) << std::endl;)
+	return count;
+}
 
-	}
+
+bool TicketsSolver::find_first_solution() noexcept
+{
+	FOR_ALL_SOLUTIONS_(return true;)
+		return false;
 }
 
 
@@ -115,22 +162,6 @@ void TicketsSolver::all_solutions(std::ostream& out, FLAG notation) noexcept
 /*********************************ПРИВАТНЫЕ МЕТОДЫ******************************************/
 
 
-inline bool TicketsSolver::find_first_solution() noexcept
-{
-	for (permutator.reinit_signs(0, opers_size);
-		permutator.are_signs_valid();
-		permutator.next_sign_configuration()) {
-
-		permutator.reinit_pos(0, opers_size);
-		while (permutator.is_doubled()) permutator.next_operators_permutation();
-		while (permutator.are_poses_valid()) {
-			if (goal == evaluator.evaluate()) return true;
-			do permutator.next_operators_permutation(); while (permutator.is_doubled());
-		}
-
-	}
-	return false;
-}
 
 //методы инициализации и реинициализации массива операторов
 
@@ -156,6 +187,10 @@ void TicketsSolver::Permutator::reinit_signs(const size_t begin,const size_t end
 	auto const i_end = ts->opers + end;
 	for (; i < i_end; i++) i->sign = OPERATORS(0);
 }
+
+inline void TicketsSolver::Permutator::reinit_signs() const noexcept { reinit_signs(0, ts->opers_size); }
+
+inline void TicketsSolver::Permutator::reinit_pos() const noexcept { reinit_pos(0, ts->opers_size); }
 
 //WARNING: не проводится проверки что end <= opers_size
 
@@ -365,11 +400,11 @@ const TicketsSolver::binary_func<Rational> TicketsSolver::Evaluator::rational_li
 };
 
 //связываем вычислитель с решателем и создаём list, использующийся в качестве черновика.
-void TicketsSolver::Evaluator::init(TicketsSolver* ts)
+void init(TicketsSolver*ts, TicketsSolver::Evaluator& e)
 {
-	this->ts = ts;
-	delete[] list;
-	list = new Rational[ts->size];
+	e.ts= ts;
+	delete[] e.list;
+	e.list = new Rational[ts->size];
 }
 
 TicketsSolver::Evaluator::~Evaluator()
@@ -396,6 +431,25 @@ inline Rational TicketsSolver::Evaluator::evaluate() const noexcept
 	
 	return list[ts->opers_size]; //возвращает последнее оставшееся значение
 }
+
+Rational TicketsSolver::Evaluator::evaluate_honestly() const noexcept
+{
+	init_list();
+	auto i = ts->opers;
+	auto const _end = ts->opers + ts->opers_size;
+	for (auto _begin = list; i != _end; i++, _begin++) {
+		auto b_iter = list + i->pos;
+		auto a_iter = b_iter - 1;
+		
+		*b_iter = rational_lib[i->sign](*a_iter, *b_iter);
+		
+
+		move(a_iter, _begin);
+	}
+
+	return list[ts->opers_size]; //возвращает последнее оставшееся значение
+}
+
 
 inline void TicketsSolver::Evaluator::init_list() const noexcept
 {
@@ -483,11 +537,11 @@ const TicketsSolver::binary_func<TicketsSolver::str_token> TicketsSolver::NORMAL
 #undef lambda
 
 //связываем вычислитель с решателем и создаём str_list, использующийся в качестве черновика.
-void TicketsSolver::StrConverter::init(TicketsSolver* ts)
+void init(TicketsSolver *ts, TicketsSolver::StrConverter & sc)
 {
-	this->ts = ts;
-	delete[] str_list;
-	str_list = new str_token[ts->size];
+	sc.ts = ts;
+	delete[] sc.str_list;
+	sc.str_list = new TicketsSolver::str_token[ts->size];
 }
 
 TicketsSolver::StrConverter::~StrConverter()
