@@ -1,5 +1,5 @@
 # BusTickets
-Программа для решения задач по типу "автобусного билетика"
+Программа для решения задач по типу "автобусного билетика".
 
 ВНИМАНИЕ КОМПИЛЯТОР ДОЛЖЕН ПОДДЕРЖИВАТЬ С++17!!!!!!!
 
@@ -18,8 +18,9 @@
 	поэтому при попытке передать отрицательный знак 
 	вернется ошибка invalid_argument.
   
-  Структура класса TicketsSolver;
-	  TicketsSolver {
+  Структура класса TicketsSolver:
+  
+  	TicketsSolver {
 	      permutator,
 	      evaluator,
 	      str_converter,
@@ -27,7 +28,7 @@
 	      some public methods,
 	      ...
 	      some private data
-	    }
+ 	}
       
    TicketsSolver хранит конфигурацию операторов, которая меняется при переборе, к которой можно использовать методы классов permutator, evaluator, str_converter.
    
