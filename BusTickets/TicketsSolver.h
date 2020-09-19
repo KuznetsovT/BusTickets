@@ -117,13 +117,30 @@ private:
 		size_t pos;
 	};
 
+	//каждому строковому представлению мы даём свой id.
+	typedef unsigned str_id;
+
+	//определяем какие id мы даём строковым выражениям
+	static const str_id
+		NUM = 0u,    //число
+		SUM = 1u,    //многочлен, сумма нескольких выражений
+		MULT = 2u,   //произведение, последний знак - умножение
+		DIV = 3u,    //частное, последний знак - деление
+		EXPR = 4u;   //сложное выражение (используется в REVERSED_NOTATION)
+
+	//строковое представление строим при помощи специальных токенов, где у каждой строки есть свой id
+	struct str_token {
+		std::string str;
+		str_id id = EXPR;
+	};
 
 	const size_t size, opers_size; //opers_size = size-1
 public:	Rational goal;                 //значение которое нужно получить
 private:
 	//массив рациональных чисел между которыми нужно расставить знаки арифметических действий
 	Rational* data = nullptr;
-	
+	//заранее создаём массив в котором хранятся строковые представления чисел из data
+	str_token* str_data = nullptr;
 	//массив токенов описывающий расстановку знаков в выражении
 	token* opers =  nullptr;
 
@@ -229,23 +246,8 @@ private:
 
 	//Реализация строкового представления
 	//Алгоритм получения строки такой же как и при генерации числа.
-private:
-	//у каждого выражения есть свой id
-	typedef unsigned str_id;
-
-	//определяем какие id мы даём строковым выражениям
-	static const str_id
-		NUM = 0u,    //число
-		SUM = 1u,    //многочлен, сумма нескольких выражений
-		MULT = 2u,   //произведение, последний знак - умножение
-		DIV = 3u,    //частное, последний знак - деление
-		EXPR = 4u;   //сложное выражение (используется в REVERSED_NOTATION)
 	
-	//строковое представление строим при помощи специальных токенов, где у каждой строки есть свой id
-	struct str_token {
-		std::string str;
-		str_id id = EXPR;
-	};
+	
 public:
 	struct StrConverter {
 	private:
@@ -291,3 +293,20 @@ void init(TicketsSolver* ts, TicketsSolver::StrConverter& sc);
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
+//макрос для написания методов вида: сделай expression для каждого решения /*чтобы получить первое решение, достаточно вставить return в expression*/
+#define FOR_ALL_SOLUTIONS_(__EXPRESSION__)													\
+{																							\
+																							\
+	for (permutator.reinit_signs();															\
+		permutator.are_signs_valid();														\
+		permutator.next_sign_configuration()) {												\
+																							\
+		permutator.reinit_pos();															\
+		while (permutator.is_doubled()) permutator.next_operators_permutation();			\
+		while (permutator.are_poses_valid()) {												\
+			if (goal == evaluator.evaluate()) { __EXPRESSION__ }							\
+			do permutator.next_operators_permutation(); while (permutator.is_doubled());	\
+		}																					\
+																							\
+	}																						\
+}																							\

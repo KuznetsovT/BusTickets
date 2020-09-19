@@ -49,6 +49,7 @@ TicketsSolver::TicketsSolver(size_t n, Rational goal, const unsigned* int_data)
 	if (!goal.IS_NUMBER())throw std::invalid_argument("TicketsSolver: goal is not a number!");
 
 	data = new Rational[size];
+	str_data = new str_token[size];
 	opers = new token[opers_size];
 
 	permutator = Permutator(this);
@@ -63,6 +64,7 @@ TicketsSolver::TicketsSolver(size_t n, Rational goal, const unsigned* int_data)
 TicketsSolver::~TicketsSolver()
 {
 	delete[] data;
+	delete[] str_data;
 	delete[] opers;
 }
 
@@ -93,23 +95,6 @@ Rational TicketsSolver::evaluate() const noexcept
 }
 
 
-//макрос для написания методов вида: сделай expression для каждого решения /*чтобы получить первое решение, достаточно вставить return в expression*/
-#define FOR_ALL_SOLUTIONS_(__EXPRESSION__)													\
-{																							\
-																							\
-	for (permutator.reinit_signs();															\
-		permutator.are_signs_valid();														\
-		permutator.next_sign_configuration()) {												\
-																							\
-		permutator.reinit_pos();															\
-		while (permutator.is_doubled()) permutator.next_operators_permutation();			\
-		while (permutator.are_poses_valid()) {												\
-			if (goal == evaluator.evaluate()) { __EXPRESSION__ }							\
-			do permutator.next_operators_permutation(); while (permutator.is_doubled());	\
-		}																					\
-																							\
-	}																						\
-}																							\
 
 
 //находит первое решение и выводит его строковое представление
@@ -196,7 +181,12 @@ bool TicketsSolver::find_first_solution() noexcept
 inline void TicketsSolver::init_data(const unsigned* int_data)
 {
 	Rational* d = data, *const end = data + size;
-	for (const auto* i = int_data; d != end; d++, i++) *d = Rational(*i);
+	str_token* str_i = str_data;
+	for (const auto* i = int_data; d != end; d++, i++, str_i++)
+	{
+		*d = Rational(*i);
+		*str_i = { std::to_string(*i), TicketsSolver::NUM };
+	}
 }
 
 inline void TicketsSolver::Permutator::init_opers() const noexcept
@@ -594,13 +584,13 @@ inline std::string TicketsSolver::StrConverter::convert(const TicketsSolver::FLA
 }
 
 
-//инициализируем лист для вычислений. ОБРАТИТЕ ВНИМАНИЕ - пользуемся Rational::numerator
+//инициализируем лист для вычислений.
 inline void TicketsSolver::StrConverter::init_str_list() const noexcept
 {
 	str_token* i = str_list;
 	str_token *const end = str_list + ts->size;
-	auto j = ts->data;
-	for (; i != end; i++, j++) { *i = { std::to_string(j->numer), TicketsSolver::NUM }; }
+	const str_token* j = ts->str_data;
+	for (; i != end; i++, j++) *i = *j;
 }
 
 //после вычисления очередного числа нужно сдвинуть элементы в списке
