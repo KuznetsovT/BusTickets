@@ -52,7 +52,7 @@ int main() {
 	/*
 			if (ts.find_first_solution()) do {
 
-			//здесь могла быть ваша реклама
+				//здесь могла быть ваша реклама
 					std::cout << ts.goal << " = " << ts.str_converter.convert(TicketsSolver::REVERSED_NOTATION) << std::endl;
 
 			} while (ts.next_solution());
