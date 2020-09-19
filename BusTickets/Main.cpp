@@ -16,7 +16,7 @@ int main() {
 	try {
 		TicketsSolver ts(length, _goal, arr.get());
 
-		std::cout << "\nOUTPUT ->\n";
+		std::cout << "\nOUTPUT ->\n\n";
 		//выводим все решения в поток
 		unsigned count = ts.all_solutions(std::cout);
 		std::cout << "\nCOUNT OF SOLUTIONS IS : " << count << std::endl;
