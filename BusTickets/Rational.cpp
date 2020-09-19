@@ -23,7 +23,7 @@ Rational::Rational(int numer, unsigned denumer) noexcept
 Rational Rational::make_Rational(int numer, unsigned denumer) noexcept
 {
 	unsigned gcd = std::gcd(numer, denumer);
-	return Rational(numer / gcd, denumer / gcd);
+	return Rational(numer /(int) gcd, denumer / gcd);
 }
 
 
@@ -125,15 +125,15 @@ inline void Rational::normalize() noexcept
 
 bool operator==(const Rational& l, const Rational& r) noexcept
 {
-	return l.numer * r.denumer == l.denumer* r.numer;
+	return l.numer *(int) r.denumer == (int) l.denumer* r.numer;
 }
 
 bool operator<(const Rational& l, const Rational& r) noexcept
 {
-	return l.numer*r.denumer <  l.denumer*r.numer;
+	return l.numer*(int) r.denumer < (int) l.denumer*r.numer;
 }
 
 bool operator>(const Rational& l, const Rational& r) noexcept
 {
-	return l.numer*r.denumer > r.numer*l.denumer;
+	return l.numer* (int) r.denumer > (int)l.denumer * r.numer;
 }

@@ -1,8 +1,8 @@
 #pragma once
 
 #include <string>
-
-
+#include <set>
+#include <map>
 #include <ostream>
 
 #include "Rational.h"
@@ -64,11 +64,13 @@ public:
 
 	//вычисляет выражение по текущей конфигурации записанной в oper. Если в opers  - фигня, возвращает NaN
 	Rational evaluate() const noexcept;
+	//если промежуточный результат получается отрицательный возвращает -1, при попытке деления на 0 возвращает INF
 	
 	//сбрасывает конфигурацию, возвращает первое найденное решение, если решений нет, возвращает пустую строку
 	std::string first_solution(const FLAG notation = NORMAL_NOTATION) noexcept;
 
-
+	//возвращает словарь всех возможных достижимых goals и количество способов решения
+	std::map<Rational, unsigned> map_of_goals() noexcept;
 	
 	unsigned count_of_solutions() noexcept;
 
@@ -95,7 +97,7 @@ private:
 		MINUS_PLUS = 2u,  //конструкция вида: -(a) + b
 		MULTIPLE = 3u,
 		DIVIDE = 4u;     //id: 4
-	static const unsigned OPERATORS_COUNT = 5u;
+
 	//проверяет что op < MULTIPLE
 	static bool IS_SUMMARY(const OPERATORS op) noexcept;
 	//проверяет что op >= MULTIPLE
@@ -154,8 +156,20 @@ public:
 		void reinit_signs() const noexcept;
 		void reinit_pos() const noexcept;
 	public:
+
+		//при обычном переборе используется все 5 знаков
+		static const unsigned NORMAL_EVALUATION = 5u;
+		//если нужен перебор тривиальных решений без деления устанавливайте в OPERATORS_SIZE  = NO_DIVISION
+		static const unsigned NO_DIVISION = 4u;
+
+		//флаг, показывающий сколько операторов используется в переборе. Для поиска только тривиальных решений используйте NO_DIVISION
+		unsigned OPERATORS_COUNT = NORMAL_EVALUATION;
+
 		//cмотрит что настоящая конфигурация знаков валидна, т.е все элементы от 0 до OPERATOR_COUNT
 		bool are_signs_valid() const noexcept;
+
+		
+
 		//Записывает в opers.sign следующую конфигурацию, не проверяет на валидность
 		void next_sign_configuration() const noexcept;
 

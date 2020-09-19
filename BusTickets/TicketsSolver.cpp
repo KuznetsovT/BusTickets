@@ -78,15 +78,17 @@ void TicketsSolver::reset() noexcept
 	permutator.init_opers();
 }
 
+//используйте, если нужно вывести выражение по хранящейся конфигурации операторов
 std::string TicketsSolver::to_str(const TicketsSolver::FLAG NOTATION) const noexcept
 {
 	if (permutator.are_signs_valid() && permutator.are_poses_valid()) return str_converter.convert(NOTATION);
 	else return std::string();
 }
 
+//используйте, если нужно посчитать выражение по хранящейся конфигурации операторов
 Rational TicketsSolver::evaluate() const noexcept
 {
-	if(permutator.are_signs_valid() && permutator.are_poses_valid()) return evaluator.evaluate_honestly();
+	if(permutator.are_signs_valid() && permutator.are_poses_valid()) return evaluator.evaluate();
 	else return Rational::NaN;
 }
 
@@ -110,14 +112,18 @@ Rational TicketsSolver::evaluate() const noexcept
 }																							\
 
 
-
+//находит первое решение и выводит его строковое представление
 std::string TicketsSolver::first_solution(FLAG notation) noexcept
 {
 	FOR_ALL_SOLUTIONS_(return str_converter.convert();)
 	return std::string();
 }
 
-
+/*ищет следующее решение, возвращает true если находит. 
+ВАЖНО, поиск начинается со следующей конфигурации операторов, 
+поэтому first_solution !={reset; next_solution}, 
+то есть нулевая конфигурация проверяться не будет
+*/
 bool TicketsSolver::next_solution() noexcept
 {
 	if (!permutator.are_signs_valid()) return false;
@@ -135,6 +141,7 @@ bool TicketsSolver::next_solution() noexcept
 
 }
 
+//выводит количество решений выражения
 unsigned TicketsSolver::count_of_solutions() noexcept
 {
 	unsigned count = 0;
@@ -142,6 +149,26 @@ unsigned TicketsSolver::count_of_solutions() noexcept
 	return count;
 }
 
+//возвращает множество всех достижимых goals, а так же количество решений
+std::map<Rational, unsigned> TicketsSolver::map_of_goals() noexcept
+{
+	std::map<Rational, unsigned> goals;
+	for (permutator.reinit_signs();
+		permutator.are_signs_valid();
+		permutator.next_sign_configuration()) {
+			permutator.reinit_pos();
+			while (permutator.is_doubled()) permutator.next_operators_permutation();
+				while (permutator.are_poses_valid()) {
+					Rational val = evaluator.evaluate();
+					if (!val.IS_INF() && !val.is_negative()) goals[val]++;
+
+					do permutator.next_operators_permutation(); while (permutator.is_doubled());
+				}
+	}
+	return goals;
+}
+
+//выводит в поток out все нейденные решения
 unsigned TicketsSolver::all_solutions(std::ostream& out, FLAG notation) noexcept
 {
 	unsigned count = 0;
@@ -149,7 +176,7 @@ unsigned TicketsSolver::all_solutions(std::ostream& out, FLAG notation) noexcept
 	return count;
 }
 
-
+//возвращает есть ли у билетика решение
 bool TicketsSolver::find_first_solution() noexcept
 {
 	FOR_ALL_SOLUTIONS_(return true;)
