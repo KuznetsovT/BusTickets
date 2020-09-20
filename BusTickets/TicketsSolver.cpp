@@ -511,10 +511,10 @@ inline void TicketsSolver::Evaluator::move(Rational* a, Rational* const _begin) 
 //ОПРЕДЕЛЯЕМ ХРАГИЛИЩЕ ФУНКЦИЙ ДЛЯ ОБРАТНОЙ ПОЛЬСКОЙ НОТАЦИИ 
 const TicketsSolver::binary_func<TicketsSolver::str_token> TicketsSolver::REVERSED_NOTATION[] = {
 	REVERSED_NOTATION_OPERATOR("+"),
-	REVERSED_NOTATION_OPERATOR("(+-)"),
-	REVERSED_NOTATION_OPERATOR("(-+)"),
+	REVERSED_NOTATION_OPERATOR("-"),
+	REVERSED_NOTATION_OPERATOR("~"),          //знак минус-плюс
 	REVERSED_NOTATION_OPERATOR("*"),
-	REVERSED_NOTATION_OPERATOR("/")
+	REVERSED_NOTATION_OPERATOR("/"),
 };
 
 

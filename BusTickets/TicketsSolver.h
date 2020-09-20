@@ -94,7 +94,7 @@ private:
 	static const OPERATORS
 		PLUS = 0u,    //id: 0
 		MINUS = 1u,
-		MINUS_PLUS = 2u,  //конструкция вида: -(a) + b
+		MINUS_PLUS = 2u,  //конструкция вида: -(a) + b обозначаем ~
 		MULTIPLE = 3u,
 		DIVIDE = 4u;     //id: 4
 
