@@ -48,11 +48,10 @@ TicketsSolver::TicketsSolver(size_t n, Rational goal, const unsigned* int_data)
 	if (size < 2) throw std::invalid_argument("TicketsSolver : size < 2 => no operators");
 	if (!goal.IS_NUMBER())throw std::invalid_argument("TicketsSolver: goal is not a number!");
 
-#ifndef _TICKETS_SOLVER_STATIC_ARRAY_SIZE_
+
 	data = new Rational[size];
 	opers = new token[opers_size];
 	str_data = new str_token[size];
-#endif
 
 	permutator = Permutator(this);
 	init(this, evaluator);
@@ -62,7 +61,7 @@ TicketsSolver::TicketsSolver(size_t n, Rational goal, const unsigned* int_data)
 	permutator.init_opers();
 }
 
-#ifndef _TICKETS_SOLVER_STATIC_ARRAY_SIZE_
+
 
 //деструктор, удаляет выделенную память в динамической реализации
 TicketsSolver::~TicketsSolver()
@@ -72,7 +71,7 @@ TicketsSolver::~TicketsSolver()
 	delete[] str_data;
 }
 
-#endif
+
 
 //устанавливает новую цель, не сбрасывает конфигурацию операторов
 void TicketsSolver::set_new_goal(Rational goal) noexcept { this->goal = goal; }
@@ -87,16 +86,16 @@ void TicketsSolver::reset() noexcept
 }
 
 //используйте, если нужно вывести выражение по хранящейся конфигурации операторов
-std::string TicketsSolver::to_str(const TicketsSolver::FLAG NOTATION) noexcept
+std::string TicketsSolver::to_str(const TicketsSolver::FLAG NOTATION) const noexcept
 {
 	if (permutator.are_signs_valid() && permutator.are_poses_valid()) return str_converter.convert(NOTATION);
 	else return std::string();
 }
 
 //используйте, если нужно посчитать выражение по хранящейся конфигурации операторов
-Rational TicketsSolver::evaluate() noexcept
+Rational TicketsSolver::evaluate() const noexcept
 {
-	if(permutator.are_signs_valid() && permutator.are_poses_valid()) return evaluator.evaluate();
+	if (permutator.are_signs_valid() && permutator.are_poses_valid()) return evaluator.evaluate();
 	else return Rational::NaN;
 }
 
@@ -106,12 +105,13 @@ Rational TicketsSolver::evaluate() noexcept
 std::string TicketsSolver::first_solution(FLAG notation) noexcept
 {
 	FOR_ALL_SOLUTIONS_(return str_converter.convert();)
-	return std::string();
+		return std::string();
 }
 
-/*ищет следующее решение, возвращает true если находит. 
-ВАЖНО, поиск начинается со следующей конфигурации операторов, 
-поэтому first_solution !={reset; next_solution}, 
+
+/*ищет следующее решение, возвращает true если находит.
+ВАЖНО, поиск начинается со следующей конфигурации операторов,
+поэтому first_solution !={reset; next_solution},
 то есть нулевая конфигурация проверяться не будет
 */
 bool TicketsSolver::next_solution() noexcept
@@ -136,7 +136,7 @@ unsigned TicketsSolver::count_of_solutions() noexcept
 {
 	unsigned count = 0;
 	FOR_ALL_SOLUTIONS_(count++;)
-	return count;
+		return count;
 }
 
 //возвращает множество всех достижимых goals, а так же количество решений
@@ -146,14 +146,14 @@ std::map<Rational, unsigned> TicketsSolver::map_of_goals() noexcept
 	for (permutator.reinit_signs();
 		permutator.are_signs_valid();
 		permutator.next_sign_configuration()) {
-			permutator.reinit_pos();
-			while (permutator.is_doubled()) permutator.next_operators_permutation();
-				while (permutator.are_poses_valid()) {
-					Rational val = evaluator.evaluate();
-					if (!val.IS_INF() && !val.is_negative()) goals[val]++;
+		permutator.reinit_pos();
+		while (permutator.is_doubled()) permutator.next_operators_permutation();
+		while (permutator.are_poses_valid()) {
+			Rational val = evaluator.evaluate();
+			if (!val.IS_INF() && !val.is_negative()) goals[val]++;
 
-					do permutator.next_operators_permutation(); while (permutator.is_doubled());
-				}
+			do permutator.next_operators_permutation(); while (permutator.is_doubled());
+		}
 	}
 	return goals;
 }
@@ -163,7 +163,7 @@ unsigned TicketsSolver::all_solutions(std::ostream& out, FLAG notation) noexcept
 {
 	unsigned count = 0;
 	FOR_ALL_SOLUTIONS_(count++;  out << " " << goal << " = " << str_converter.convert(notation) << std::endl;)
-	return count;
+		return count;
 }
 
 //возвращает есть ли у билетика решение
@@ -185,7 +185,7 @@ bool TicketsSolver::find_first_solution() noexcept
 
 inline void TicketsSolver::init_data(const unsigned* int_data)
 {
-	Rational* d = data, *const end = data + size;
+	Rational* d = data, * const end = data + size;
 	str_token* str_d = str_data;
 	for (const auto* i = int_data; d != end; d++, i++, str_d++) {
 		*d = Rational(*i);
@@ -202,7 +202,7 @@ inline void TicketsSolver::Permutator::init_opers() const noexcept
 //часто нам будет требоваться реинициализировать часть массива
 
 //WARNING: не проводится проверки что end <= opers_size
-void TicketsSolver::Permutator::reinit_signs(const size_t begin,const size_t end) const noexcept
+void TicketsSolver::Permutator::reinit_signs(const size_t begin, const size_t end) const noexcept
 {
 	auto i = ts->opers + begin;
 	auto const i_end = ts->opers + end;
@@ -215,12 +215,12 @@ inline void TicketsSolver::Permutator::reinit_pos() const noexcept { reinit_pos(
 
 //WARNING: не проводится проверки что end <= opers_size
 
-/*инициализация происходит в виде [ 1, 2, 3, 4, 5, 6...] 
+/*инициализация происходит в виде [ 1, 2, 3, 4, 5, 6...]
 Параметр характеризует минимальное инициализируемое значение
-(обычно это значение предыдущего элемента перед begin). 
+(обычно это значение предыдущего элемента перед begin).
 Это нужно чтобы гарантировать неубываемость последовательности
 */
-void TicketsSolver::Permutator::reinit_pos(const size_t begin,const size_t end, const size_t min_value) const noexcept
+void TicketsSolver::Permutator::reinit_pos(const size_t begin, const size_t end, const size_t min_value) const noexcept
 {
 	size_t val = begin + 1;
 	auto i = ts->opers + begin;
@@ -256,7 +256,7 @@ inline bool TicketsSolver::Permutator::are_signs_valid() const noexcept
 }
 
 
-inline void TicketsSolver::Permutator::next_sign_configuration() const noexcept
+inline void TicketsSolver::Permutator::next_sign_configuration() noexcept
 {
 	auto i = ts->opers + ts->opers_size - 1;
 	auto i_prev = i - 1;
@@ -267,7 +267,8 @@ inline void TicketsSolver::Permutator::next_sign_configuration() const noexcept
 		if (i->sign == OPERATORS_COUNT) {
 			i_prev->sign++;
 			i->sign = 0;
-		} else {
+		}
+		else {
 			return;
 		}
 	}
@@ -291,14 +292,14 @@ inline void TicketsSolver::Permutator::next_sign_configuration() const noexcept
 */
 
 //возвращает формальную следующую престановку. Не проверяет на валидность! Не проверяет на дубляжи!
-inline void TicketsSolver::Permutator::next_operators_permutation() const noexcept
+inline void TicketsSolver::Permutator::next_operators_permutation() noexcept
 {
 	size_t reinit_begin = ts->opers_size - 1;
 	const size_t reinit_end = ts->opers_size - 1;
 
 	auto i = ts->opers + ts->opers_size - 2;
 	auto const i_end = ts->opers;
-	
+
 	for (; i > i_end; i--, reinit_begin--) {
 		if (i->pos != ts->opers_size) {
 			i->pos++;
@@ -349,7 +350,7 @@ inline bool TicketsSolver::Permutator::are_poses_valid() const noexcept
 
 /*
 Таким образом, нам следует делать проверку на дубляжи!
-	Проходим по массиву и смотрим два соседних знака, 
+	Проходим по массиву и смотрим два соседних знака,
 		если у них одинаковые позиции,
 			проверяем что они не из одинаковых вселенных(+ и *)
 		если у них соседние позиции,
@@ -365,12 +366,13 @@ inline bool TicketsSolver::Permutator::is_doubled() const noexcept
 	auto i = ts->opers + ts->opers_size - 1, j = i - 1;
 	auto const i_end = ts->opers;
 	for (; i != i_end; i--, j--) {
-		if (i->pos == j->pos) 
+		if (i->pos == j->pos)
 		{
 			if (CheckForSamePos(i, j)) //says that it is a double
 				return true;
-			
-		} else if (i->pos == j->pos + 1) 
+
+		}
+		else if (i->pos == j->pos + 1)
 		{
 			if (CheckForNeighbourPos(i, j)) //says that it is a double
 				return true;
@@ -387,8 +389,8 @@ inline bool TicketsSolver::Permutator::CheckForSamePos(const token* i, const tok
 
 inline bool TicketsSolver::Permutator::CheckForNeighbourPos(const token* i, const token* j) noexcept
 {
-	return (i->sign == MINUS_PLUS) && (j->sign == MINUS_PLUS || j->sign == MINUS);			
-				//почему данные конфигурации - дублеры см. выше
+	return (i->sign == MINUS_PLUS) && (j->sign == MINUS_PLUS || j->sign == MINUS);
+	//почему данные конфигурации - дублеры см. выше
 }
 
 //проверяет что оператор принадлежит к классу { +, (+-), (-+) }
@@ -421,27 +423,22 @@ const TicketsSolver::binary_func<Rational> TicketsSolver::Evaluator::rational_li
 };
 
 //связываем вычислитель с решателем и создаём list, использующийся в качестве черновика.
-void init(TicketsSolver*ts, TicketsSolver::Evaluator& e)
+void init(TicketsSolver* ts, TicketsSolver::Evaluator& e)
 {
-	e.ts= ts;
-
-#ifndef _TICKETS_SOLVER_STATIC_ARRAY_SIZE_
+	e.ts = ts;
 	delete[] e.list;
 	e.list = new Rational[ts->size];
-#endif
 }
 
-#ifndef _TICKETS_SOLVER_STATIC_ARRAY_SIZE_
 
 TicketsSolver::Evaluator::~Evaluator()
 {
 	delete[] list;
 }
 
-#endif
 
 
-inline Rational TicketsSolver::Evaluator::evaluate() noexcept
+inline Rational TicketsSolver::Evaluator::evaluate() const noexcept
 {
 	init_list();
 	auto i = ts->opers;
@@ -456,11 +453,11 @@ inline Rational TicketsSolver::Evaluator::evaluate() noexcept
 		if (b_iter->is_negative()) return Rational(-1);
 		move(a_iter, _begin);
 	}
-	
+
 	return list[ts->opers_size]; //возвращает последнее оставшееся значение
 }
 
-Rational TicketsSolver::Evaluator::evaluate_honestly() noexcept
+Rational TicketsSolver::Evaluator::evaluate_honestly() const noexcept
 {
 	init_list();
 	auto i = ts->opers;
@@ -468,9 +465,9 @@ Rational TicketsSolver::Evaluator::evaluate_honestly() noexcept
 	for (auto _begin = list; i != _end; i++, _begin++) {
 		auto b_iter = list + i->pos;
 		auto a_iter = b_iter - 1;
-		
+
 		*b_iter = rational_lib[i->sign](*a_iter, *b_iter);
-		
+
 
 		move(a_iter, _begin);
 	}
@@ -479,7 +476,7 @@ Rational TicketsSolver::Evaluator::evaluate_honestly() noexcept
 }
 
 
-inline void TicketsSolver::Evaluator::init_list() noexcept
+inline void TicketsSolver::Evaluator::init_list() const noexcept
 {
 	Rational* i = list;
 	Rational* const end = list + ts->size;
@@ -526,7 +523,7 @@ const TicketsSolver::binary_func<TicketsSolver::str_token> TicketsSolver::REVERS
 #define lambda	[]																\
 	(const TicketsSolver::str_token& a, const TicketsSolver::str_token& b)		\
 	-> TicketsSolver::str_token
-		
+
 //ОПРЕДЕЛЯЕМ ХРАНИЛИЩЕ ФУНКЦИЙ ДЛЯ НОРМАЛЬНОЙ НОТАЦИИ
 const TicketsSolver::binary_func<TicketsSolver::str_token> TicketsSolver::NORMAL_NOTATION[] = {
 	lambda {
@@ -545,18 +542,18 @@ const TicketsSolver::binary_func<TicketsSolver::str_token> TicketsSolver::NORMAL
 
 	lambda {
 		str_token t;
-		t.str += (a.id == TicketsSolver::MULT || a.id == TicketsSolver::NUM) ? a.str+" " : "(" + a.str + ")";
+		t.str += (a.id == TicketsSolver::MULT || a.id == TicketsSolver::NUM) ? a.str + " " : "(" + a.str + ")";
 		t.str += "*";
-		t.str += (b.id == TicketsSolver::MULT || b.id == TicketsSolver::NUM) ? " "+b.str : "(" + b.str + ")";
+		t.str += (b.id == TicketsSolver::MULT || b.id == TicketsSolver::NUM) ? " " + b.str : "(" + b.str + ")";
 		t.id = TicketsSolver::MULT;
 		return t;
 	},
 
 	lambda {
 		str_token t;
-		t.str += (a.id == TicketsSolver::MULT || a.id == TicketsSolver::NUM) ? a.str+" " : "(" + a.str + ")";
+		t.str += (a.id == TicketsSolver::MULT || a.id == TicketsSolver::NUM) ? a.str + " " : "(" + a.str + ")";
 		t.str += "/";
-		t.str += (b.id == TicketsSolver::NUM) ? " "+b.str : "(" + b.str + ")";
+		t.str += (b.id == TicketsSolver::NUM) ? " " + b.str : "(" + b.str + ")";
 		t.id = TicketsSolver::DIV;
 		return t;
 	}
@@ -565,27 +562,22 @@ const TicketsSolver::binary_func<TicketsSolver::str_token> TicketsSolver::NORMAL
 #undef lambda
 
 //связываем вычислитель с решателем и создаём str_list, использующийся в качестве черновика.
-void init(TicketsSolver *ts, TicketsSolver::StrConverter & sc)
+void init(TicketsSolver* ts, TicketsSolver::StrConverter& sc)
 {
 	sc.ts = ts;
-#ifndef _TICKETS_SOLVER_STATIC_ARRAY_SIZE_
-
 	delete[] sc.str_list;
 	sc.str_list = new TicketsSolver::str_token[ts->size];
-#endif
 }
 
-#ifndef _TICKETS_SOLVER_STATIC_ARRAY_SIZE_
 
 TicketsSolver::StrConverter::~StrConverter()
 {
 	delete[] str_list;
 }
 
-#endif
 
 //Функция высчиывает строковое представление выражения
-inline std::string TicketsSolver::StrConverter::convert(const TicketsSolver::FLAG NOTATION) noexcept
+inline std::string TicketsSolver::StrConverter::convert(const TicketsSolver::FLAG NOTATION) const noexcept
 {
 	init_str_list();
 	auto i = ts->opers;
@@ -603,10 +595,10 @@ inline std::string TicketsSolver::StrConverter::convert(const TicketsSolver::FLA
 
 
 //инициализируем лист для вычислений. ОБРАТИТЕ ВНИМАНИЕ - пользуемся Rational::numerator
-inline void TicketsSolver::StrConverter::init_str_list() noexcept
+inline void TicketsSolver::StrConverter::init_str_list() const noexcept
 {
 	str_token* i = str_list;
-	str_token *const end = str_list + ts->size;
+	str_token* const end = str_list + ts->size;
 	auto j = ts->str_data;
 	for (; i != end; i++, j++) *i = *j;
 }
