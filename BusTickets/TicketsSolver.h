@@ -7,7 +7,7 @@
 #include "Rational.h"
 
 //если данный макрос определён, все массивы в классе будут статическими заданной длины
-#define _TICKETS_SOLVER_STATIC_ARRAY_SIZE_ 16
+	//#define _TICKETS_SOLVER_STATIC_ARRAY_SIZE_ 16
 
 /*
 Задача по решению автобусного билетика заключается в следующем:
