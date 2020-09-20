@@ -48,8 +48,11 @@ TicketsSolver::TicketsSolver(size_t n, Rational goal, const unsigned* int_data)
 	if (size < 2) throw std::invalid_argument("TicketsSolver : size < 2 => no operators");
 	if (!goal.IS_NUMBER())throw std::invalid_argument("TicketsSolver: goal is not a number!");
 
+#ifndef _TICKETS_SOLVER_STATIC_ARRAY_SIZE_
 	data = new Rational[size];
 	opers = new token[opers_size];
+	str_data = new str_token[size];
+#endif
 
 	permutator = Permutator(this);
 	init(this, evaluator);
@@ -59,12 +62,17 @@ TicketsSolver::TicketsSolver(size_t n, Rational goal, const unsigned* int_data)
 	permutator.init_opers();
 }
 
-//деструктор, удаляет выделенную память
+#ifndef _TICKETS_SOLVER_STATIC_ARRAY_SIZE_
+
+//деструктор, удаляет выделенную память в динамической реализации
 TicketsSolver::~TicketsSolver()
 {
 	delete[] data;
 	delete[] opers;
+	delete[] str_data;
 }
+
+#endif
 
 //устанавливает новую цель, не сбрасывает конфигурацию операторов
 void TicketsSolver::set_new_goal(Rational goal) noexcept { this->goal = goal; }
@@ -79,37 +87,19 @@ void TicketsSolver::reset() noexcept
 }
 
 //используйте, если нужно вывести выражение по хранящейся конфигурации операторов
-std::string TicketsSolver::to_str(const TicketsSolver::FLAG NOTATION) const noexcept
+std::string TicketsSolver::to_str(const TicketsSolver::FLAG NOTATION) noexcept
 {
 	if (permutator.are_signs_valid() && permutator.are_poses_valid()) return str_converter.convert(NOTATION);
 	else return std::string();
 }
 
 //используйте, если нужно посчитать выражение по хранящейся конфигурации операторов
-Rational TicketsSolver::evaluate() const noexcept
+Rational TicketsSolver::evaluate() noexcept
 {
 	if(permutator.are_signs_valid() && permutator.are_poses_valid()) return evaluator.evaluate();
 	else return Rational::NaN;
 }
 
-
-//макрос для написания методов вида: сделай expression для каждого решения /*чтобы получить первое решение, достаточно вставить return в expression*/
-#define FOR_ALL_SOLUTIONS_(__EXPRESSION__)													\
-{																							\
-																							\
-	for (permutator.reinit_signs();															\
-		permutator.are_signs_valid();														\
-		permutator.next_sign_configuration()) {												\
-																							\
-		permutator.reinit_pos();															\
-		while (permutator.is_doubled()) permutator.next_operators_permutation();			\
-		while (permutator.are_poses_valid()) {												\
-			if (goal == evaluator.evaluate()) { __EXPRESSION__ }							\
-			do permutator.next_operators_permutation(); while (permutator.is_doubled());	\
-		}																					\
-																							\
-	}																						\
-}																							\
 
 
 //находит первое решение и выводит его строковое представление
@@ -196,7 +186,11 @@ bool TicketsSolver::find_first_solution() noexcept
 inline void TicketsSolver::init_data(const unsigned* int_data)
 {
 	Rational* d = data, *const end = data + size;
-	for (const auto* i = int_data; d != end; d++, i++) *d = Rational(*i);
+	str_token* str_d = str_data;
+	for (const auto* i = int_data; d != end; d++, i++, str_d++) {
+		*d = Rational(*i);
+		*str_d = { std::to_string(*i), TicketsSolver::NUM };
+	}
 }
 
 inline void TicketsSolver::Permutator::init_opers() const noexcept
@@ -430,17 +424,24 @@ const TicketsSolver::binary_func<Rational> TicketsSolver::Evaluator::rational_li
 void init(TicketsSolver*ts, TicketsSolver::Evaluator& e)
 {
 	e.ts= ts;
+
+#ifndef _TICKETS_SOLVER_STATIC_ARRAY_SIZE_
 	delete[] e.list;
 	e.list = new Rational[ts->size];
+#endif
 }
+
+#ifndef _TICKETS_SOLVER_STATIC_ARRAY_SIZE_
 
 TicketsSolver::Evaluator::~Evaluator()
 {
 	delete[] list;
 }
 
+#endif
 
-inline Rational TicketsSolver::Evaluator::evaluate() const noexcept
+
+inline Rational TicketsSolver::Evaluator::evaluate() noexcept
 {
 	init_list();
 	auto i = ts->opers;
@@ -459,7 +460,7 @@ inline Rational TicketsSolver::Evaluator::evaluate() const noexcept
 	return list[ts->opers_size]; //возвращает последнее оставшееся значение
 }
 
-Rational TicketsSolver::Evaluator::evaluate_honestly() const noexcept
+Rational TicketsSolver::Evaluator::evaluate_honestly() noexcept
 {
 	init_list();
 	auto i = ts->opers;
@@ -478,7 +479,7 @@ Rational TicketsSolver::Evaluator::evaluate_honestly() const noexcept
 }
 
 
-inline void TicketsSolver::Evaluator::init_list() const noexcept
+inline void TicketsSolver::Evaluator::init_list() noexcept
 {
 	Rational* i = list;
 	Rational* const end = list + ts->size;
@@ -567,17 +568,24 @@ const TicketsSolver::binary_func<TicketsSolver::str_token> TicketsSolver::NORMAL
 void init(TicketsSolver *ts, TicketsSolver::StrConverter & sc)
 {
 	sc.ts = ts;
+#ifndef _TICKETS_SOLVER_STATIC_ARRAY_SIZE_
+
 	delete[] sc.str_list;
 	sc.str_list = new TicketsSolver::str_token[ts->size];
+#endif
 }
+
+#ifndef _TICKETS_SOLVER_STATIC_ARRAY_SIZE_
 
 TicketsSolver::StrConverter::~StrConverter()
 {
 	delete[] str_list;
 }
 
+#endif
+
 //Функция высчиывает строковое представление выражения
-inline std::string TicketsSolver::StrConverter::convert(const TicketsSolver::FLAG NOTATION) const noexcept
+inline std::string TicketsSolver::StrConverter::convert(const TicketsSolver::FLAG NOTATION) noexcept
 {
 	init_str_list();
 	auto i = ts->opers;
@@ -595,12 +603,12 @@ inline std::string TicketsSolver::StrConverter::convert(const TicketsSolver::FLA
 
 
 //инициализируем лист для вычислений. ОБРАТИТЕ ВНИМАНИЕ - пользуемся Rational::numerator
-inline void TicketsSolver::StrConverter::init_str_list() const noexcept
+inline void TicketsSolver::StrConverter::init_str_list() noexcept
 {
 	str_token* i = str_list;
 	str_token *const end = str_list + ts->size;
-	auto j = ts->data;
-	for (; i != end; i++, j++) { *i = { std::to_string(j->numer), TicketsSolver::NUM }; }
+	auto j = ts->str_data;
+	for (; i != end; i++, j++) *i = *j;
 }
 
 //после вычисления очередного числа нужно сдвинуть элементы в списке

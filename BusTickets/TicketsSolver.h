@@ -6,7 +6,8 @@
 
 #include "Rational.h"
 
-
+//если данный макрос определён, все массивы в классе будут статическими заданной длины
+	#define _TICKETS_SOLVER_STATIC_ARRAY_SIZE_ 16
 
 /*
 Задача по решению автобусного билетика заключается в следующем:
@@ -47,7 +48,11 @@ public:
 	//Конструктор класса TicketsSolver. ОБРАТИТЕ ВНИМАНИЕ! goal >= 0 и n > 1 !
 	TicketsSolver(size_t n, /*unsigned*/ Rational goal, const unsigned* data);
 
-	~TicketsSolver();
+#ifndef _TICKETS_SOLVER_STATIC_ARRAY_SIZE_
+	virtual ~TicketsSolver();
+#else
+	virtual ~TicketsSolver() = default;
+#endif
 
 	//устанавливает новую цель
 	void set_new_goal(Rational goal) noexcept;
@@ -59,10 +64,10 @@ public:
 	void reset() noexcept;
 
 	//возвращает строковое представление текущей конфигурации операторов
-	std::string to_str(const FLAG NOTATION = NORMAL_NOTATION) const noexcept;
+	std::string to_str(const FLAG NOTATION = NORMAL_NOTATION) noexcept;
 
 	//вычисляет выражение по текущей конфигурации записанной в oper. Если в opers  - фигня, возвращает NaN
-	Rational evaluate() const noexcept;
+	Rational evaluate() noexcept;
 	//если промежуточный результат получается отрицательный возвращает -1, при попытке деления на 0 возвращает INF
 
 	//сбрасывает конфигурацию, возвращает первое найденное решение, если решений нет, возвращает пустую строку
@@ -137,12 +142,23 @@ private:
 	const size_t size, opers_size; //opers_size = size-1
 public:	Rational goal;                 //значение которое нужно получить
 private:
+
+#ifndef _TICKETS_SOLVER_STATIC_ARRAY_SIZE_
+
 	//массив рациональных чисел между которыми нужно расставить знаки арифметических действий
 	Rational* data = nullptr;
 	//заранее создаём массив в котором хранятся строковые представления чисел из data
 	str_token* str_data = nullptr;
 	//массив токенов описывающий расстановку знаков в выражении
 	token* opers = nullptr;
+#else 
+	//массив рациональных чисел между которыми нужно расставить знаки арифметических действий
+	Rational data[_TICKETS_SOLVER_STATIC_ARRAY_SIZE_];
+	//заранее создаём массив в котором хранятся строковые представления чисел из data
+	str_token str_data[_TICKETS_SOLVER_STATIC_ARRAY_SIZE_];
+	//массив токенов описывающий расстановку знаков в выражении
+	token opers[_TICKETS_SOLVER_STATIC_ARRAY_SIZE_];
+#endif
 
 	//создаём массив data с которым будем работать
 	void init_data(const unsigned* int_data);
@@ -213,26 +229,37 @@ public:
 	//реализация класса вычисляющего арифметическое выражение
 	struct Evaluator {
 	private:
+#ifndef _TICKETS_SOLVER_STATIC_ARRAY_SIZE_
+
 		//черновой лист на котором будут происходить вычисления
 		Rational* list = nullptr;
+#else
+		//черновой лист на котором будут происходить вычисления
+		Rational list[_TICKETS_SOLVER_STATIC_ARRAY_SIZE_];
+#endif
 		TicketsSolver* ts = nullptr;
 	public:
 		//централизованное хранилище для всех нужных нам операторов
 		static const binary_func<Rational> rational_lib[];
 
 		//функция производит нужные вычисления если происходит деление на 0 возвращает INF
-		Rational evaluate() const noexcept; //если промежуточный результат отрицательный - возвращает -1
+		Rational evaluate() noexcept; //если промежуточный результат отрицательный - возвращает -1
 
 		//честно до конца производит все вычисления
-		Rational evaluate_honestly() const noexcept;
+		Rational evaluate_honestly() noexcept;
 
 		//связывает Evaluator и TicketsSolver а так же производит выделение памяти по лист
 		friend void init(TicketsSolver*, Evaluator& e);
+
+#ifndef  _TICKETS_SOLVER_STATIC_ARRAY_SIZE_
 		virtual ~Evaluator();
+#else
+		virtual ~Evaluator() = default;
+#endif
 
 	private:
-		//копирует из data в eval_list
-		void init_list() const noexcept;
+		//копирует из data в list
+		void init_list() noexcept;
 
 		//производим сдвиг eval_list
 		static void move(Rational* a, Rational* const _begin) noexcept;
@@ -251,21 +278,33 @@ private:
 public:
 	struct StrConverter {
 	private:
+
+#ifndef  _TICKETS_SOLVER_STATIC_ARRAY_SIZE_
+
 		//массив на котором будет происходить генерация выходной строки
 		TicketsSolver::str_token* str_list = nullptr;
+#else
+		//массив на котором будет происходить генерация выходной строки
+		TicketsSolver::str_token str_list[_TICKETS_SOLVER_STATIC_ARRAY_SIZE_];
+#endif
 		//связь с обьектом TicketsSolver
 		TicketsSolver* ts = nullptr;
 	public:
 
 		//метод вычисляющий строковое представление нашей конфигурации
-		std::string convert(const FLAG notation = NORMAL_NOTATION) const noexcept;
+		std::string convert(const FLAG notation = NORMAL_NOTATION) noexcept;
 
 		//cвязываем обьект типа StrConverter с обьектом типа TicketsSolver
 		friend void init(TicketsSolver* ts, StrConverter& sc);
-		~StrConverter();
+
+#ifndef _TICKETS_SOLVER_STATIC_ARRAY_SIZE_
+		virtual ~StrConverter();
+#else
+		virtual ~StrConverter() = default;
+#endif
 	private:
 		//создаёт начальное представление чисел
-		void init_str_list() const noexcept;
+		void init_str_list() noexcept;
 
 		//производим сдвиг eval_list
 		static void move(str_token* a, str_token* const _begin) noexcept;
