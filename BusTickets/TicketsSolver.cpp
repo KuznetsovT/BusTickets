@@ -33,22 +33,22 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 //макрос для написания методов вида: сделай expression для каждого решения /*чтобы получить первое решение, достаточно вставить return в expression*/
-#define FOR_ALL_SOLUTIONS_(__EXPRESSION__)													\
-{																							\
-																							\
-	for (permutator.reinit_signs();															\
-		permutator.are_signs_valid();														\
-		permutator.next_sign_configuration()) {												\
-																							\
-		permutator.reinit_pos();															\
-		while (permutator.is_doubled()) permutator.next_operators_permutation();			\
-		while (permutator.are_poses_valid()) {												\
-			if (goal == evaluator.evaluate()) { __EXPRESSION__ }							\
-			do permutator.next_operators_permutation(); while (permutator.is_doubled());	\
-		}																					\
-																							\
-	}																						\
-}																							\
+#define FOR_ALL_SOLUTIONS_(__EXPRESSION__)                                                  \
+{                                                                                           \
+                                                                                            \
+    for (permutator.reinit_signs();                                                         \
+        permutator.are_signs_valid();                                                       \
+        permutator.next_sign_configuration()) {                                             \
+                                                                                            \
+        permutator.reinit_pos();                                                            \
+        while (permutator.is_doubled()) permutator.next_operators_permutation();            \
+        while (permutator.are_poses_valid()) {                                              \
+            if (goal == evaluator.evaluate()) { __EXPRESSION__ }                            \
+            do permutator.next_operators_permutation(); while (permutator.is_doubled());    \
+        }                                                                                   \
+                                                                                            \
+    }                                                                                       \
+}                                                                                           \
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -526,10 +526,11 @@ inline void TicketsSolver::Evaluator::move(Rational* a, Rational* const _begin) 
 //Определяем массивы функций которые будут вызываться конвертёром
 
 //при создании REVERSED_NOTATION воспользуемся макросом, так как большая часть кода неудобно повторяется
-#define REVERSED_NOTATION_OPERATOR(sign)    []									\
-	(const TicketsSolver::str_token& a, const TicketsSolver::str_token& b)		\
-	-> TicketsSolver::str_token													\
-	{ return { a.str + " " + b.str + " " + sign, TicketsSolver::EXPR }; }
+#define REVERSED_NOTATION_OPERATOR(sign)    []                                  \
+	(const TicketsSolver::str_token& a, const TicketsSolver::str_token& b)      \
+	-> TicketsSolver::str_token                                                 \
+	{ return { a.str + " " + b.str + " " + sign, TicketsSolver::EXPR }; }       \
+
 
 
 //ОПРЕДЕЛЯЕМ ХРАНИЛИЩЕ ФУНКЦИЙ ДЛЯ ОБРАТНОЙ ПОЛЬСКОЙ НОТАЦИИ 
@@ -544,9 +545,10 @@ const TicketsSolver::binary_func<TicketsSolver::str_token> TicketsSolver::REVERS
 
 #undef REVERSED_NOTATION_OPERATOR
 
-#define lambda	[]																\
-	(const TicketsSolver::str_token& a, const TicketsSolver::str_token& b)		\
-	-> TicketsSolver::str_token
+#define lambda	[]                                                              \
+	(const TicketsSolver::str_token& a, const TicketsSolver::str_token& b)      \
+	-> TicketsSolver::str_token                                                 \
+
 
 
 //ОПРЕДЕЛЯЕМ ХРАНИЛИЩЕ ФУНКЦИЙ ДЛЯ НОРМАЛЬНОЙ НОТАЦИИ
