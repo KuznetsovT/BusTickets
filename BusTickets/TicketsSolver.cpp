@@ -545,7 +545,7 @@ const TicketsSolver::binary_func<TicketsSolver::str_token> TicketsSolver::REVERS
 
 #undef REVERSED_NOTATION_OPERATOR
 
-#define lambda	[]                                                              \
+#define lambda  []                                                              \
 	(const TicketsSolver::str_token& a, const TicketsSolver::str_token& b)      \
 	-> TicketsSolver::str_token                                                 \
 
