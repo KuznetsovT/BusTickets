@@ -31,6 +31,25 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
+
+//макрос для написания методов вида: сделай expression для каждого решения /*чтобы получить первое решение, достаточно вставить return в expression*/
+#define FOR_ALL_SOLUTIONS_(__EXPRESSION__)													\
+{																							\
+																							\
+	for (permutator.reinit_signs();															\
+		permutator.are_signs_valid();														\
+		permutator.next_sign_configuration()) {												\
+																							\
+		permutator.reinit_pos();															\
+		while (permutator.is_doubled()) permutator.next_operators_permutation();			\
+		while (permutator.are_poses_valid()) {												\
+			if (goal == evaluator.evaluate()) { __EXPRESSION__ }							\
+			do permutator.next_operators_permutation(); while (permutator.is_doubled());	\
+		}																					\
+																							\
+	}																						\
+}																							\
+
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -193,7 +212,7 @@ inline void TicketsSolver::init_data(const unsigned* int_data)
 	}
 }
 
-inline void TicketsSolver::Permutator::init_opers() const noexcept
+inline void TicketsSolver::Permutator::init_opers() noexcept
 {
 	reinit_signs(0, ts->opers_size);
 	reinit_pos(0, ts->opers_size);
@@ -202,16 +221,16 @@ inline void TicketsSolver::Permutator::init_opers() const noexcept
 //часто нам будет требоваться реинициализировать часть массива
 
 //WARNING: не проводится проверки что end <= opers_size
-void TicketsSolver::Permutator::reinit_signs(const size_t begin, const size_t end) const noexcept
+void TicketsSolver::Permutator::reinit_signs(const size_t begin, const size_t end) noexcept
 {
 	auto i = ts->opers + begin;
 	auto const i_end = ts->opers + end;
 	for (; i < i_end; i++) i->sign = OPERATORS(0);
 }
 
-inline void TicketsSolver::Permutator::reinit_signs() const noexcept { reinit_signs(0, ts->opers_size); }
+inline void TicketsSolver::Permutator::reinit_signs() noexcept { reinit_signs(0, ts->opers_size); }
 
-inline void TicketsSolver::Permutator::reinit_pos() const noexcept { reinit_pos(0, ts->opers_size); }
+inline void TicketsSolver::Permutator::reinit_pos() noexcept { reinit_pos(0, ts->opers_size); }
 
 //WARNING: не проводится проверки что end <= opers_size
 
@@ -220,16 +239,16 @@ inline void TicketsSolver::Permutator::reinit_pos() const noexcept { reinit_pos(
 (обычно это значение предыдущего элемента перед begin).
 Это нужно чтобы гарантировать неубываемость последовательности
 */
-void TicketsSolver::Permutator::reinit_pos(const size_t begin, const size_t end, const size_t min_value) const noexcept
+void TicketsSolver::Permutator::reinit_pos(const size_t begin, const size_t end, const size_t min_value) noexcept
 {
 	size_t val = begin + 1;
 	auto i = ts->opers + begin;
 	auto const i_end = ts->opers + end;
-	for (; i < i_end; i++, val++) i->pos = std::max(min_value, val);
+	for (; i < i_end; i++, val++) i->pos = (min_value < val) ? val : min_value;
 }
 
 //аналогично вызову reinit_pos(begin, end, 0);
-void TicketsSolver::Permutator::reinit_pos(const size_t begin, const size_t end) const noexcept
+void TicketsSolver::Permutator::reinit_pos(const size_t begin, const size_t end) noexcept
 {
 	size_t val = begin + 1;
 	auto i = ts->opers + begin;
@@ -237,6 +256,11 @@ void TicketsSolver::Permutator::reinit_pos(const size_t begin, const size_t end)
 	for (; i < i_end; i++, val++) i->pos = val;
 }
 
+
+void TicketsSolver::Permutator::last_pos_configuration() noexcept
+{
+	for (token* i = ts->opers, *_end = ts->opers + ts->opers_size; i != _end; i++) i->pos = ts->opers_size;
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 //Реализация перебора знаков
@@ -508,7 +532,7 @@ inline void TicketsSolver::Evaluator::move(Rational* a, Rational* const _begin) 
 	{ return { a.str + " " + b.str + " " + sign, TicketsSolver::EXPR }; }
 
 
-//ОПРЕДЕЛЯЕМ ХРАГИЛИЩЕ ФУНКЦИЙ ДЛЯ ОБРАТНОЙ ПОЛЬСКОЙ НОТАЦИИ 
+//ОПРЕДЕЛЯЕМ ХРАНИЛИЩЕ ФУНКЦИЙ ДЛЯ ОБРАТНОЙ ПОЛЬСКОЙ НОТАЦИИ 
 const TicketsSolver::binary_func<TicketsSolver::str_token> TicketsSolver::REVERSED_NOTATION[] = {
 	REVERSED_NOTATION_OPERATOR("+"),
 	REVERSED_NOTATION_OPERATOR("-"),
@@ -523,6 +547,7 @@ const TicketsSolver::binary_func<TicketsSolver::str_token> TicketsSolver::REVERS
 #define lambda	[]																\
 	(const TicketsSolver::str_token& a, const TicketsSolver::str_token& b)		\
 	-> TicketsSolver::str_token
+
 
 //ОПРЕДЕЛЯЕМ ХРАНИЛИЩЕ ФУНКЦИЙ ДЛЯ НОРМАЛЬНОЙ НОТАЦИИ
 const TicketsSolver::binary_func<TicketsSolver::str_token> TicketsSolver::NORMAL_NOTATION[] = {
