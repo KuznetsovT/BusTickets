@@ -527,9 +527,9 @@ inline void TicketsSolver::Evaluator::move(Rational* a, Rational* const _begin) 
 
 //при создании REVERSED_NOTATION воспользуемся макросом, так как большая часть кода неудобно повторяется
 #define REVERSED_NOTATION_OPERATOR(sign)    []                                  \
-	(const TicketsSolver::str_token& a, const TicketsSolver::str_token& b)      \
-	-> TicketsSolver::str_token                                                 \
-	{ return { a.str + " " + b.str + " " + sign, TicketsSolver::EXPR }; }       \
+    (const TicketsSolver::str_token& a, const TicketsSolver::str_token& b)      \
+    -> TicketsSolver::str_token                                                 \
+    { return { a.str + " " + b.str + " " + sign, TicketsSolver::EXPR }; }       \
 
 
 
@@ -546,8 +546,8 @@ const TicketsSolver::binary_func<TicketsSolver::str_token> TicketsSolver::REVERS
 #undef REVERSED_NOTATION_OPERATOR
 
 #define lambda  []                                                              \
-	(const TicketsSolver::str_token& a, const TicketsSolver::str_token& b)      \
-	-> TicketsSolver::str_token                                                 \
+    (const TicketsSolver::str_token& a, const TicketsSolver::str_token& b)      \
+    -> TicketsSolver::str_token                                                 \
 
 
 
