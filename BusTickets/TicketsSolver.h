@@ -211,7 +211,7 @@ public:
 		чтобы они не оказались дубляжом другой расстановки знаков*/
 		const static unsigned diff_factor[NORMAL_EVALUATION][NORMAL_EVALUATION];
 
-		void minimize_pos(TicketsSolver::token* begin, unsigned num, TicketsSolver::token* end) noexcept;
+		void minimize_pos(TicketsSolver::token* begin, unsigned num, TicketsSolver::token * end) noexcept;
 
 	} permutator; //у каждого TicketsSolver есть свой Permutator
 
