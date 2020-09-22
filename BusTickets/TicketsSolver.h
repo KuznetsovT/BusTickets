@@ -33,10 +33,11 @@ class TicketsSolver {
 private:
 	//тип - бинарная функция для двух аргументов, например { return a+b; }
 	template<class T> using binary_func = T(*)(const T&, const T&);
-	//чтруктура для организации отображения решений в str
+	//cтруктура для организации отображения решений в str
 	struct str_token;
-public:
+
 	typedef const binary_func<str_token> FLAG[];
+public:
 
 	//используйте данный флаг если нужно вывести выражение в обратной польской нотации
 	const static FLAG REVERSED_NOTATION;
@@ -45,7 +46,7 @@ public:
 	const static FLAG NORMAL_NOTATION;
 
 	//Конструктор класса TicketsSolver. ОБРАТИТЕ ВНИМАНИЕ! goal >= 0 и n > 1 !
-	TicketsSolver(size_t n, /*unsigned*/ Rational goal, const unsigned* data);
+	TicketsSolver(unsigned n, /*unsigned*/ Rational goal, const unsigned* data);
 
 	virtual ~TicketsSolver();
 
@@ -75,7 +76,7 @@ public:
 	unsigned count_of_solutions() noexcept;
 
 	//записывает все решения в out, выводит количество записанных решений
-	unsigned all_solutions(std::ostream& out, FLAG notation = NORMAL_NOTATION)noexcept;
+	unsigned all_solutions(std::ostream& out, FLAG notation = NORMAL_NOTATION) noexcept;
 
 	//сбрасывает конфигурацию операторов, ищет первое решение, возвращает true если находит
 	bool find_first_solution() noexcept;
@@ -94,7 +95,7 @@ private:
 	static const OPERATORS
 		PLUS = 0u,    //id: 0
 		MINUS = 1u,
-		MINUS_PLUS = 2u,  //конструкция вида: -(a) + b
+		MINUS_PLUS = 2u,  //конструкция вида: -(a) + b обозначаем ~
 		MULTIPLE = 3u,
 		DIVIDE = 4u;     //id: 4
 
@@ -115,7 +116,7 @@ private:
 	//структура описывающая оператор
 	struct token {
 		OPERATORS sign;
-		size_t pos;
+		unsigned pos;
 	};
 
 	//каждому строковому представлению мы даём свой id.
@@ -135,7 +136,7 @@ private:
 		str_id id = EXPR;
 	};
 
-	const size_t size, opers_size;     //opers_size = size-1
+	const unsigned size, opers_size;     //opers_size = size-1
 public:	Rational goal;                 //значение которое нужно получить
 private:
 
@@ -165,15 +166,17 @@ public:
 		Permutator(TicketsSolver* const ts) : ts(ts) {}
 
 		//перед поиском решений производим инициализацию массива
-		void init_opers() const noexcept;
+		void init_opers() noexcept;
 	private:
 		//эти функции проводят частичную реинициализацию массива
-		void reinit_signs(const size_t begin, const size_t end) const noexcept;
-		void reinit_pos(const size_t begin, const size_t end) const noexcept;
-		void reinit_pos(const size_t begin, const size_t end, const size_t min_value) const noexcept;
+		void reinit_signs(const unsigned begin, const unsigned end) noexcept;
+		void reinit_pos(const unsigned begin, const unsigned end) noexcept;
+		void reinit_pos(const unsigned begin, const unsigned end, const unsigned min_value) noexcept;
 	public:
-		void reinit_signs() const noexcept;
-		void reinit_pos() const noexcept;
+		void reinit_signs() noexcept;
+		void reinit_pos() noexcept;
+		//переписывает позиции арифм.знаков на последние возможные позиции.(без проверки на дубляжи)
+		void last_pos_configuration() noexcept;
 	public:
 
 		//при обычном переборе используется все 5 знаков
@@ -187,23 +190,28 @@ public:
 		//cмотрит что настоящая конфигурация знаков валидна, т.е все элементы от 0 до OPERATOR_COUNT
 		bool are_signs_valid() const noexcept;
 
-
-
 		//Записывает в opers.sign следующую конфигурацию, не проверяет на валидность
 		void next_sign_configuration() noexcept;
+
 
 		//проверка массива позиций на валидность
 		bool are_poses_valid() const noexcept;
 
-		//записывает в signs следующую перестановку позиций с проверкой на дубляжи!
+		//записывает в opers следующую перестановку позиций без проверки на дубляжи!
 		void next_operators_permutation() noexcept;
+
+		//пытается записать в щзукы следующую перестановку с ПРОВЕРКОЙ НА ДУБЛЯЖИ!
+		bool next_operators_configuration() noexcept;
 
 		//проверяет что данная позиция не является дублёром другой позиции
 		virtual bool is_doubled() const noexcept;
 	private:
-		//вспомогательные функции для is_doubled
-		static bool CheckForSamePos(const token* i, const token* j) noexcept;
-		static bool CheckForNeighbourPos(const token* i, const token* j) noexcept;
+
+		/*в массиве содержится информация какое минимально расстояние должно быть между соседними знаками,
+		чтобы они не оказались дубляжом другой расстановки знаков*/
+		const static unsigned diff_factor[NORMAL_EVALUATION][NORMAL_EVALUATION];
+
+		void minimize_pos(TicketsSolver::token* begin, unsigned num, TicketsSolver::token* end) noexcept;
 
 	} permutator; //у каждого TicketsSolver есть свой Permutator
 
@@ -302,20 +310,3 @@ void init(TicketsSolver* ts, TicketsSolver::StrConverter& sc);
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-//макрос для написания методов вида: сделай expression для каждого решения /*чтобы получить первое решение, достаточно вставить return в expression*/
-#define FOR_ALL_SOLUTIONS_(__EXPRESSION__)													\
-{																							\
-																							\
-	for (permutator.reinit_signs();															\
-		permutator.are_signs_valid();														\
-		permutator.next_sign_configuration()) {												\
-																							\
-		permutator.reinit_pos();															\
-		while (permutator.is_doubled()) permutator.next_operators_permutation();			\
-		while (permutator.are_poses_valid()) {												\
-			if (goal == evaluator.evaluate()) { __EXPRESSION__ }							\
-			do permutator.next_operators_permutation(); while (permutator.is_doubled());	\
-		}																					\
-																							\
-	}																						\
-}																							\
