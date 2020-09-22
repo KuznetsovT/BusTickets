@@ -46,7 +46,7 @@ public:
 	const static FLAG NORMAL_NOTATION;
 
 	//Конструктор класса TicketsSolver. ОБРАТИТЕ ВНИМАНИЕ! goal >= 0 и n > 1 !
-	TicketsSolver(size_t n, /*unsigned*/ Rational goal, const unsigned* data);
+	TicketsSolver(unsigned n, /*unsigned*/ Rational goal, const unsigned* data);
 
 	virtual ~TicketsSolver();
 
@@ -116,7 +116,7 @@ private:
 	//структура описывающая оператор
 	struct token {
 		OPERATORS sign;
-		size_t pos;
+		unsigned pos;
 	};
 
 	//каждому строковому представлению мы даём свой id.
@@ -136,7 +136,7 @@ private:
 		str_id id = EXPR;
 	};
 
-	const size_t size, opers_size;     //opers_size = size-1
+	const unsigned size, opers_size;     //opers_size = size-1
 public:	Rational goal;                 //значение которое нужно получить
 private:
 
@@ -169,9 +169,9 @@ public:
 		void init_opers() noexcept;
 	private:
 		//эти функции проводят частичную реинициализацию массива
-		void reinit_signs(const size_t begin, const size_t end) noexcept;
-		void reinit_pos(const size_t begin, const size_t end) noexcept;
-		void reinit_pos(const size_t begin, const size_t end, const size_t min_value) noexcept;
+		void reinit_signs(const unsigned begin, const unsigned end) noexcept;
+		void reinit_pos(const unsigned begin, const unsigned end) noexcept;
+		void reinit_pos(const unsigned begin, const unsigned end, const unsigned min_value) noexcept;
 	public:
 		void reinit_signs() noexcept;
 		void reinit_pos() noexcept;
@@ -200,12 +200,18 @@ public:
 		//записывает в opers следующую перестановку позиций без проверки на дубляжи!
 		void next_operators_permutation() noexcept;
 
+		//пытается записать в щзукы следующую перестановку с ПРОВЕРКОЙ НА ДУБЛЯЖИ!
+		bool next_operators_configuration() noexcept;
+
 		//проверяет что данная позиция не является дублёром другой позиции
 		virtual bool is_doubled() const noexcept;
 	private:
-		//вспомогательные функции для is_doubled
-		static bool CheckForSamePos(const token* i, const token* j) noexcept;
-		static bool CheckForNeighbourPos(const token* i, const token* j) noexcept;
+
+		/*в массиве содержится информация какое минимально расстояние должно быть между соседними знаками,
+		чтобы они не оказались дубляжом другой расстановки знаков*/
+		const static unsigned diff_factor[NORMAL_EVALUATION][NORMAL_EVALUATION];
+
+		void minimize_pos(TicketsSolver::token* begin, unsigned num, TicketsSolver::token * end) noexcept;
 
 	} permutator; //у каждого TicketsSolver есть свой Permutator
 
