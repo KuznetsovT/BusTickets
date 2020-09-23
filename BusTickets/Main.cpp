@@ -3,17 +3,17 @@
 #include <iostream>
 #include <fstream>
 
-#define length 9
+#define length 6
 #define _goal 100
 
 int main() {
-	unsigned arr[length] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-	//std::cout << "INPUT. PRINT 6 NATURAL NUMBERS: ";
+	unsigned arr[length] = { 0, 0, 0, 0, 0, 0 };
+	std::cout << "INPUT. PRINT 6 NATURAL NUMBERS: ";
 	for (auto& i : arr) { std::cin >> i; }
 	TicketsSolver ts(length, _goal, arr);
 
 	//хочу чтобы выводились только тривиальные решения без деления.
-	//ts.permutator.OPERATORS_COUNT = TicketsSolver::Permutator::NO_DIVISION;
+	ts.permutator.WORKING_OPERATORS = TicketsSolver::Permutator::NO_DIVISION;
 
 	//потом я хочу вывести решения в обратной польской нотации
 
@@ -64,19 +64,4 @@ int main() {
 	return 0;
 }
 
-
-//int main() {
-//	std::ifstream qe("qe.txt"), bs("bs.txt");
-//	std::string q, b;
-//	unsigned line = 0;
-//	if (!qe.is_open() || !bs.is_open()) std::cout << "PROBLEM\n";
-//	while (!qe.eof()) {
-//		std::getline(qe, q);
-//		std::getline(bs, b);
-//		if (q != b) {
-//			std::cout << "LINE : " << line << std::endl << q << std::endl << b << "\n----\n";
-//		}
-//		line++;
-//	}
-//}
 

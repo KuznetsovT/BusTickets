@@ -124,7 +124,7 @@ Rational TicketsSolver::evaluate() const noexcept
 std::string TicketsSolver::first_solution(FLAG notation) noexcept
 {
 	FOR_ALL_SOLUTIONS_(return str_converter.convert();)
-		return std::string();
+	return std::string();
 }
 
 
@@ -159,7 +159,7 @@ unsigned TicketsSolver::count_of_solutions() noexcept
 {
 	unsigned count = 0;
 	FOR_ALL_SOLUTIONS_(count++;)
-		return count;
+	return count;
 }
 
 //возвращает множество всех достижимых goals, а так же количество решений
@@ -194,7 +194,7 @@ unsigned TicketsSolver::all_solutions(std::ostream& out, FLAG notation) noexcept
 bool TicketsSolver::find_first_solution() noexcept
 {
 	FOR_ALL_SOLUTIONS_(return true;)
-		return false;
+	return false;
 }
 
 
@@ -239,7 +239,7 @@ void TicketsSolver::Permutator::reinit_pos() noexcept { reinit_pos(0, ts->opers_
 
 //WARNING: не проводится проверки что end <= opers_size
 
-/*инициализация происходит в виде [ 1, 2, 3, 4, 5, 6...]
+/*инициализация позиций происходит в виде [ 1, 2, 3, 4, 5, 6...]
 Параметр характеризует минимальное инициализируемое значение
 (обычно это значение предыдущего элемента перед begin).
 Это нужно чтобы гарантировать неубываемость последовательности
@@ -268,7 +268,8 @@ void TicketsSolver::Permutator::last_pos_configuration() noexcept
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
-//Реализация перебора знаков
+
+//!!!!!!!!!!!!!!!!!!!!!!РЕАЛИЗАЦИЯ ПЕРЕБОРА ЗНАКОВ!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 /*
 Опишем алгоритм перебора знаков и их положений.
@@ -281,7 +282,7 @@ void TicketsSolver::Permutator::last_pos_configuration() noexcept
 
 inline bool TicketsSolver::Permutator::are_signs_valid() const noexcept
 {
-	return (ts->opers)->sign < OPERATORS_COUNT;
+	return (ts->opers)->sign < WORKING_OPERATORS;
 }
 
 
@@ -293,7 +294,7 @@ inline void TicketsSolver::Permutator::next_sign_configuration() noexcept
 
 	i->sign++;
 	for (; i != i_end; i--, i_prev--) {
-		if (i->sign == OPERATORS_COUNT) {
+		if (i->sign == WORKING_OPERATORS) {
 			i_prev->sign++;
 			i->sign = 0;
 		}
@@ -391,7 +392,7 @@ inline bool TicketsSolver::Permutator::are_poses_valid() const noexcept
 */
 
 
-const unsigned TicketsSolver::Permutator::diff_factor[TicketsSolver::Permutator::NORMAL_EVALUATION][TicketsSolver::Permutator::NORMAL_EVALUATION] =
+const unsigned TicketsSolver::Permutator::diff_factor[TicketsSolver::OPERATORS_COUNT][TicketsSolver::OPERATORS_COUNT] =
 {
 	{ 1, 1, 1, 0, 0 }, // + все знаки из того же множества (+-~) имеют diff_factor = 1
 	{ 1, 1, 2, 0, 0 }, // - все знаки из того же множество имеют ненулевой фактор. конфигурация [-][~] особенная

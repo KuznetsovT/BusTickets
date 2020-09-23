@@ -130,6 +130,9 @@ private:
 		DIV = 3u,    //частное, последний знак - деление
 		EXPR = 4u;   //сложное выражение (используется в REVERSED_NOTATION)
 
+	//количество знаков в нашей реализации
+	static const unsigned OPERATORS_COUNT = 5u;
+
 	//строковое представление строим при помощи специальных токенов, где у каждой строки есть свой id
 	struct str_token {
 		std::string str;
@@ -173,21 +176,25 @@ public:
 		void reinit_pos(const unsigned begin, const unsigned end) noexcept;
 		void reinit_pos(const unsigned begin, const unsigned end, const unsigned min_value) noexcept;
 	public:
+		//полная реиницилизация массива
 		void reinit_signs() noexcept;
 		void reinit_pos() noexcept;
+		
 		//пытается построить первую(минимальную) уникальную(недублирующую) конфигурацию позиций операторов. Возвращает true, если успешно.
 		bool min_unique_pos() noexcept;
 		//переписывает позиции арифм.знаков на последние возможные позиции.(без проверки на дубляжи)
 		void last_pos_configuration() noexcept;
 	public:
-
+		
 		//при обычном переборе используется все 5 знаков
-		static const unsigned NORMAL_EVALUATION = 5u;
+		static const unsigned NORMAL_EVALUATION = OPERATORS_COUNT;
 		//если нужен перебор тривиальных решений без деления устанавливайте в OPERATORS_SIZE  = NO_DIVISION
 		static const unsigned NO_DIVISION = 4u;
+		//если нужен перебор только из плюсов и минусов
+		static const unsigned ONLY_SUM = 3u;
 
 		//флаг, показывающий сколько операторов используется в переборе. Для поиска только тривиальных решений используйте NO_DIVISION
-		unsigned OPERATORS_COUNT = NORMAL_EVALUATION;
+		unsigned WORKING_OPERATORS = NORMAL_EVALUATION;
 
 		//cмотрит что настоящая конфигурация знаков валидна, т.е все элементы от 0 до OPERATOR_COUNT
 		bool are_signs_valid() const noexcept;
@@ -202,7 +209,7 @@ public:
 		//записывает в opers следующую перестановку позиций без проверки на дубляжи!
 		void next_operators_permutation() noexcept;
 
-		//пытается записать в щзукы следующую перестановку с ПРОВЕРКОЙ НА ДУБЛЯЖИ!
+		//пытается записать в opers следующую перестановку с ПРОВЕРКОЙ НА ДУБЛЯЖИ!
 		bool next_operators_configuration() noexcept;
 
 		//проверяет что данная позиция не является дублёром другой позиции
@@ -213,6 +220,7 @@ public:
 		чтобы они не оказались дубляжом другой расстановки знаков*/
 		const static unsigned diff_factor[NORMAL_EVALUATION][NORMAL_EVALUATION];
 
+		//на отрезке [begin, end) устанавливает минимальную недублированную конфигурацию позиций операторов
 		void minimize_pos(TicketsSolver::token* begin, unsigned num, TicketsSolver::token * end) noexcept;
 
 	} permutator; //у каждого TicketsSolver есть свой Permutator
