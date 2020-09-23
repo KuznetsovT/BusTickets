@@ -175,6 +175,8 @@ public:
 	public:
 		void reinit_signs() noexcept;
 		void reinit_pos() noexcept;
+		//пытается построить первую(минимальную) уникальную(недублирующую) конфигурацию позиций операторов. Возвращает true, если успешно.
+		bool min_unique_pos() noexcept;
 		//переписывает позиции арифм.знаков на последние возможные позиции.(без проверки на дубляжи)
 		void last_pos_configuration() noexcept;
 	public:
