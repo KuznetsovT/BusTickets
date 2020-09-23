@@ -40,10 +40,7 @@
         permutator.are_signs_valid();                                                       \
         permutator.next_sign_configuration()) {                                             \
                                                                                             \
-        permutator.reinit_pos();                                                            \
-        if (permutator.is_doubled())                                                        \
-            if (!permutator.next_operators_configuration()) continue;                       \
-        do {                                                                                \
+        if (permutator.min_unique_pos()) do {                                               \
                                                                                             \
             if (goal == evaluator.evaluate()) { __EXPRESSION__ }                            \
                                                                                             \
@@ -138,9 +135,15 @@ std::string TicketsSolver::first_solution(FLAG notation) noexcept
 */
 bool TicketsSolver::next_solution() noexcept
 {
-	if (!permutator.are_signs_valid()) return false; //START CONDITIONS
-	if (!permutator.next_operators_configuration()) goto sign_increase;
-	do {                                                        //
+	if (!permutator.are_signs_valid()) return false;                                  //START CONDITIONS
+	if (!permutator.is_doubled()) {                                                   //
+		if (!permutator.next_operators_configuration()) goto sign_increase;           //
+	}
+	else {                                                                            //
+		do permutator.next_operators_permutation(); while (permutator.is_doubled());  //
+		if (!permutator.are_poses_valid()) goto sign_increase;                        //
+	}
+	do {
 		do {                                                    //POS INCREASE
 			if (goal == evaluator.evaluate()) return true;      //
 		} while (permutator.next_operators_configuration());    //
@@ -148,7 +151,7 @@ bool TicketsSolver::next_solution() noexcept
 	sign_increase:   //GOTO SIGN INCREASE
 		permutator.next_sign_configuration();                   //SIGN INCREASE
 		if (!permutator.are_signs_valid()) return false;        //
-		permutator.reinit_pos();
+		if (!permutator.min_unique_pos()) goto sign_increase;
 	} while (true);
 }
 
@@ -167,10 +170,7 @@ std::map<Rational, unsigned> TicketsSolver::map_of_goals() noexcept
 	for (permutator.reinit_signs(); permutator.are_signs_valid();
 		permutator.next_sign_configuration()) {
 
-		permutator.reinit_pos();
-		if (permutator.is_doubled())
-			if (!permutator.next_operators_configuration()) continue;
-		do {
+		if (permutator.min_unique_pos()) do {
 			Rational val = evaluator.evaluate();
 			if (!val.IS_INF() && !val.is_negative()) goals[val]++;
 
@@ -236,7 +236,7 @@ void TicketsSolver::Permutator::reinit_signs(const unsigned begin, const unsigne
 
 inline void TicketsSolver::Permutator::reinit_signs() noexcept { reinit_signs(0, ts->opers_size); }
 
-inline void TicketsSolver::Permutator::reinit_pos() noexcept { reinit_pos(0, ts->opers_size); }
+void TicketsSolver::Permutator::reinit_pos() noexcept { reinit_pos(0, ts->opers_size); }
 
 //WARNING: не проводится проверки что end <= opers_size
 
@@ -322,7 +322,7 @@ inline void TicketsSolver::Permutator::next_sign_configuration() noexcept
 */
 
 //возвращает формальную следующую престановку. Не проверяет на валидность! Не проверяет на дубляжи!
-inline void TicketsSolver::Permutator::next_operators_permutation() noexcept
+void TicketsSolver::Permutator::next_operators_permutation() noexcept
 {
 	size_t reinit_begin = ts->opers_size - 1;
 	const size_t reinit_end = ts->opers_size - 1;
@@ -391,7 +391,7 @@ inline bool TicketsSolver::Permutator::are_poses_valid() const noexcept
 	эти операторы не могут быть даже на соседних позициях, поэтому их фактор равен 2.
 */
 
-//показывает какая макисмальная разность позиций может быть у двух соседних операторов
+
 const unsigned TicketsSolver::Permutator::diff_factor[TicketsSolver::Permutator::NORMAL_EVALUATION][TicketsSolver::Permutator::NORMAL_EVALUATION] =
 {
 	{ 1, 1, 1, 0, 0 }, // + все знаки из того же множества (+-~) имеют diff_factor = 1
@@ -436,14 +436,27 @@ bool TicketsSolver::Permutator::next_operators_configuration() noexcept
 			minimize_pos(j, num, opers_last);
 			return true;
 		}
-		else if (i->pos > max_pos) {  //мы изначально находимся выше нужного, а всё что можно было поднять - уже подняли
-			return false;
-		}
 	}
 	return false;
 }
+#include <iostream>
 
+//пытается составить минимальную уникальную конфигурацию позиций операторов. Если удаётся, возвращает true
+bool TicketsSolver::Permutator::min_unique_pos() noexcept
+{
+	token* i = ts->opers;
+	token* j = i + 1;
+	token* const last = ts->opers + ts->opers_size - 1;
+	unsigned num = 2;
+	for (i->pos = 1; j <= last; i++, j++, num++) {
+		unsigned min_value = i->pos + diff_factor[i->sign][j->sign];
+		if (min_value > ts->opers_size) return false;
+		j->pos = (min_value > num) ? min_value : num;
+	}
+	return true;
+}
 
+//функция аналогична min_unique_pos на промежутке [begin, end). Однако при вызове данной функции мы заранее знаем что минимизация возможна.
 void TicketsSolver::Permutator::minimize_pos(TicketsSolver::token* begin, unsigned num, TicketsSolver::token* end) noexcept
 {
 	for (auto j = begin, i = begin - 1; j < end; j++, i++, num++) {
