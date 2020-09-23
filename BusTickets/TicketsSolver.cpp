@@ -137,14 +137,14 @@ bool TicketsSolver::next_solution() noexcept
 {
 	if (!permutator.are_signs_valid()) return false;                                  //START CONDITIONS
 	if (!permutator.is_doubled()) {                                                   //
-		if (!permutator.next_operators_configuration()) goto sign_increase;           //
+	    if (!permutator.next_operators_configuration()) goto sign_increase;           //
 	} else {                                                                          //
-		do permutator.next_operators_permutation(); while (permutator.is_doubled());  //
-		if (!permutator.are_poses_valid()) goto sign_increase;                        //
+	    do permutator.next_operators_permutation(); while (permutator.is_doubled());  //
+	    if (!permutator.are_poses_valid()) goto sign_increase;                        //
 	}
 	do {                                                        
 		do {                                                    //POS INCREASE
-			if (goal == evaluator.evaluate()) return true;      //
+		    if (goal == evaluator.evaluate()) return true;      //
 		} while (permutator.next_operators_configuration());    //
 		                                                        
 	sign_increase:   //GOTO SIGN INCREASE
