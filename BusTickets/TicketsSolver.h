@@ -175,6 +175,8 @@ public:
 	public:
 		void reinit_signs() noexcept;
 		void reinit_pos() noexcept;
+		//пытается построить первую(минимальную) уникальную(недублирующую) конфигурацию позиций операторов. Возвращает true, если успешно.
+		bool min_unique_pos() noexcept;
 		//переписывает позиции арифм.знаков на последние возможные позиции.(без проверки на дубляжи)
 		void last_pos_configuration() noexcept;
 	public:
@@ -211,7 +213,7 @@ public:
 		чтобы они не оказались дубляжом другой расстановки знаков*/
 		const static unsigned diff_factor[NORMAL_EVALUATION][NORMAL_EVALUATION];
 
-		void minimize_pos(TicketsSolver::token* begin, unsigned num, TicketsSolver::token * end) noexcept;
+		void minimize_pos(TicketsSolver::token* begin, unsigned num, TicketsSolver::token* end) noexcept;
 
 	} permutator; //у каждого TicketsSolver есть свой Permutator
 
