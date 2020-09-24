@@ -334,6 +334,6 @@ void init(TicketsSolver* ts, TicketsSolver::StrConverter& sc);
             }                                                            \
                                                                          \
         } while ((_TS_).permutator.next_operators_configuration());      \
-        	                                                             \
+                                                                         \
     }                                                                    \
 
