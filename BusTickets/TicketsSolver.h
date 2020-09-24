@@ -218,7 +218,7 @@ public:
 
 		/*в массиве содержится информация какое минимально расстояние должно быть между соседними знаками,
 		чтобы они не оказались дубляжом другой расстановки знаков*/
-		const static unsigned diff_factor[NORMAL_EVALUATION][NORMAL_EVALUATION];
+		const static unsigned diff_factor[OPERATORS_COUNT][OPERATORS_COUNT];
 
 		//на отрезке [begin, end) устанавливает минимальную недублированную конфигурацию позиций операторов
 		void minimize_pos(TicketsSolver::token* begin, unsigned num, TicketsSolver::token * end) noexcept;
