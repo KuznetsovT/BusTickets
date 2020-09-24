@@ -320,3 +320,20 @@ void init(TicketsSolver* ts, TicketsSolver::StrConverter& sc);
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
+//макрос который говорит сделать _EXPRESSION_ для каждого решения у обьекта _TS_. 
+//При использовании в _EXPRESSION_ оператор return вы получаете только первое решение
+#define TS_FOR_ALL_SOLUTIONS(_TS_, _EXPRESSION_)                 \
+    for ((_TS_).permutator.reinit_signs();                       \
+         (_TS_).permutator.are_signs_valid();                    \
+         (_TS_).permutator.next_sign_configuration()) {          \
+                                                                 \
+        if (ts.permutator.min_unique_pos()) do {                 \
+                                                                 \
+            if (ts.goal == ts.evaluator.evaluate()) {            \
+                { _EXPRESSION_ }                                 \
+            }                                                    \
+                                                                 \
+        } while (ts.permutator.next_operators_configuration());  \
+        	                                                     \
+    }                                                            \
+

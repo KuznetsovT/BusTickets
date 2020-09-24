@@ -60,6 +60,7 @@ int main() {
 
 	*/
 	
+	//при отменной лени можно воспользоваться TS_FOR_ALL_SOLUTIONS(_ts_, _expr_)
 	
 	return 0;
 }
