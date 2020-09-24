@@ -7,6 +7,8 @@
 #define length 6
 #define _goal 100
 
+// в данной реализации поля нам видны приватные поля TS для большей эффективности 
+
 int main() {
 	unsigned arr[length] = { 0, 0, 0, 0, 0, 0 };
 
@@ -15,19 +17,18 @@ int main() {
 	unsigned count = 0;
 
 	auto begin_time = std::chrono::steady_clock::now();
-	while (arr[length - 1] < 10) {
+	while (ts.data[length - 1].numer < 10) {
 
-		if (ts.count_of_solutions() != 0) {
+		if (ts.find_first_solution() != 0) {
 			count++;
 		}
-		arr[0]++;
-		for (auto i = arr, j = arr + 1; i != arr + length - 1; i++, j++) {
-			if (*i == 10) {
-				*i = 0; (*j)++;
+		ts.data[0].numer++;
+		for (auto i = ts.data, j = ts.data + 1; i != ts.data + length - 1; i++, j++) {
+			if (i->numer == 10) {
+				i->numer = 0; j->numer++;
 			}
 			else break;
 		}
-		ts.set_new_data(arr);
 	}
 	auto end_time = std::chrono::steady_clock::now();
 

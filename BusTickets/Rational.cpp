@@ -118,7 +118,7 @@ bool Rational::IS_NUMBER() const noexcept
 inline void Rational::normalize() noexcept
 {
 	unsigned gcd = std::gcd(numer, denumer);
-	numer /= gcd; denumer /= gcd;
+	numer /= (int)gcd; denumer /= gcd;
 }
 
 

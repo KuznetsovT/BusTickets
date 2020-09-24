@@ -304,6 +304,10 @@ public:
 
 	//cвязываем обьект типа StrConverter с обьектом типа TicketsSolver
 	friend void init(TicketsSolver* ts, StrConverter& sc);
+
+	//||||||||||||||||||||||||||||||||||||||||||||||||||
+	friend int main();
+	//||||||||||||||||||||||||||||||||||||||||||||||||||
 };
 
 

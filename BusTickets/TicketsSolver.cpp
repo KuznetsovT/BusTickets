@@ -40,15 +40,15 @@
         permutator.are_signs_valid();                                                       \
         permutator.next_sign_configuration()) {                                             \
                                                                                             \
-        permutator.reinit_pos();                                                            \
-        while (permutator.is_doubled()) permutator.next_operators_permutation();            \
-        while (permutator.are_poses_valid()) {                                              \
+        if (permutator.min_unique_pos()) do {                                               \
+                                                                                            \
             if (goal == evaluator.evaluate()) { __EXPRESSION__ }                            \
-            do permutator.next_operators_permutation(); while (permutator.is_doubled());    \
-        }                                                                                   \
+                                                                                            \
+        } while (permutator.next_operators_configuration());                                \
                                                                                             \
     }                                                                                       \
 }                                                                                           \
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -60,7 +60,7 @@
 
 
 
-TicketsSolver::TicketsSolver(size_t n, Rational goal, const unsigned* int_data)
+TicketsSolver::TicketsSolver(unsigned n, Rational goal, const unsigned* int_data)
 	:size(n), opers_size(n - 1), goal(goal)
 {
 	if (goal.is_negative()) throw std::invalid_argument("TicketsSolver : goal is negative");
@@ -135,19 +135,24 @@ std::string TicketsSolver::first_solution(FLAG notation) noexcept
 */
 bool TicketsSolver::next_solution() noexcept
 {
-	if (!permutator.are_signs_valid()) return false;
-	permutator.next_operators_permutation();
+	if (!permutator.are_signs_valid()) return false;                                  //START CONDITIONS
+	if (!permutator.is_doubled()) {                                                   //
+		if (!permutator.next_operators_configuration()) goto sign_increase;           //
+	}
+	else {                                                                          //
+		do permutator.next_operators_permutation(); while (permutator.is_doubled());  //
+		if (!permutator.are_poses_valid()) goto sign_increase;                        //
+	}
 	do {
-		while (permutator.is_doubled()) permutator.next_operators_permutation();
-		while (permutator.are_poses_valid()) {
-			if (goal == evaluator.evaluate()) return true;
-			do permutator.next_operators_permutation(); while (permutator.is_doubled());
-		}
-		permutator.next_sign_configuration();
-		if (!permutator.are_signs_valid()) return false;
-		permutator.reinit_pos();
-	} while (true);
+		do {                                                    //POS INCREASE
+			if (goal == evaluator.evaluate()) return true;      //
+		} while (permutator.next_operators_configuration());    //
 
+	sign_increase:   //GOTO SIGN INCREASE
+		permutator.next_sign_configuration();                   //SIGN INCREASE
+		if (!permutator.are_signs_valid()) return false;        //
+		if (!permutator.min_unique_pos()) goto sign_increase;
+	} while (true);
 }
 
 //выводит количество решений выражения
@@ -162,17 +167,15 @@ unsigned TicketsSolver::count_of_solutions() noexcept
 std::map<Rational, unsigned> TicketsSolver::map_of_goals() noexcept
 {
 	std::map<Rational, unsigned> goals;
-	for (permutator.reinit_signs();
-		permutator.are_signs_valid();
+	for (permutator.reinit_signs(); permutator.are_signs_valid();
 		permutator.next_sign_configuration()) {
-		permutator.reinit_pos();
-		while (permutator.is_doubled()) permutator.next_operators_permutation();
-		while (permutator.are_poses_valid()) {
+
+		if (permutator.min_unique_pos()) do {
 			Rational val = evaluator.evaluate();
 			if (!val.IS_INF() && !val.is_negative()) goals[val]++;
 
-			do permutator.next_operators_permutation(); while (permutator.is_doubled());
-		}
+		} while (permutator.next_operators_configuration());
+
 	}
 	return goals;
 }
@@ -181,7 +184,10 @@ std::map<Rational, unsigned> TicketsSolver::map_of_goals() noexcept
 unsigned TicketsSolver::all_solutions(std::ostream& out, FLAG notation) noexcept
 {
 	unsigned count = 0;
-	FOR_ALL_SOLUTIONS_(count++;  out << " " << goal << " = " << str_converter.convert(notation) << std::endl;)
+	FOR_ALL_SOLUTIONS_(
+		count++;
+	out << " " << goal << " = " << str_converter.convert(notation) << std::endl;
+	)
 		return count;
 }
 
@@ -221,7 +227,7 @@ inline void TicketsSolver::Permutator::init_opers() noexcept
 //часто нам будет требоваться реинициализировать часть массива
 
 //WARNING: не проводится проверки что end <= opers_size
-void TicketsSolver::Permutator::reinit_signs(const size_t begin, const size_t end) noexcept
+void TicketsSolver::Permutator::reinit_signs(const unsigned begin, const unsigned end) noexcept
 {
 	auto i = ts->opers + begin;
 	auto const i_end = ts->opers + end;
@@ -230,16 +236,16 @@ void TicketsSolver::Permutator::reinit_signs(const size_t begin, const size_t en
 
 inline void TicketsSolver::Permutator::reinit_signs() noexcept { reinit_signs(0, ts->opers_size); }
 
-inline void TicketsSolver::Permutator::reinit_pos() noexcept { reinit_pos(0, ts->opers_size); }
+void TicketsSolver::Permutator::reinit_pos() noexcept { reinit_pos(0, ts->opers_size); }
 
 //WARNING: не проводится проверки что end <= opers_size
 
-/*инициализация происходит в виде [ 1, 2, 3, 4, 5, 6...]
+/*инициализация позиций происходит в виде [ 1, 2, 3, 4, 5, 6...]
 Параметр характеризует минимальное инициализируемое значение
 (обычно это значение предыдущего элемента перед begin).
 Это нужно чтобы гарантировать неубываемость последовательности
 */
-void TicketsSolver::Permutator::reinit_pos(const size_t begin, const size_t end, const size_t min_value) noexcept
+void TicketsSolver::Permutator::reinit_pos(const unsigned begin, const unsigned end, const unsigned min_value) noexcept
 {
 	size_t val = begin + 1;
 	auto i = ts->opers + begin;
@@ -248,7 +254,7 @@ void TicketsSolver::Permutator::reinit_pos(const size_t begin, const size_t end,
 }
 
 //аналогично вызову reinit_pos(begin, end, 0);
-void TicketsSolver::Permutator::reinit_pos(const size_t begin, const size_t end) noexcept
+void TicketsSolver::Permutator::reinit_pos(const unsigned begin, const unsigned end) noexcept
 {
 	size_t val = begin + 1;
 	auto i = ts->opers + begin;
@@ -263,7 +269,8 @@ void TicketsSolver::Permutator::last_pos_configuration() noexcept
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
-//Реализация перебора знаков
+
+//!!!!!!!!!!!!!!!!!!!!!!РЕАЛИЗАЦИЯ ПЕРЕБОРА ЗНАКОВ!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 /*
 Опишем алгоритм перебора знаков и их положений.
@@ -276,7 +283,7 @@ void TicketsSolver::Permutator::last_pos_configuration() noexcept
 
 inline bool TicketsSolver::Permutator::are_signs_valid() const noexcept
 {
-	return (ts->opers)->sign < OPERATORS_COUNT;
+	return (ts->opers)->sign < WORKING_OPERATORS;
 }
 
 
@@ -288,7 +295,7 @@ inline void TicketsSolver::Permutator::next_sign_configuration() noexcept
 
 	i->sign++;
 	for (; i != i_end; i--, i_prev--) {
-		if (i->sign == OPERATORS_COUNT) {
+		if (i->sign == WORKING_OPERATORS) {
 			i_prev->sign++;
 			i->sign = 0;
 		}
@@ -316,7 +323,7 @@ inline void TicketsSolver::Permutator::next_sign_configuration() noexcept
 */
 
 //возвращает формальную следующую престановку. Не проверяет на валидность! Не проверяет на дубляжи!
-inline void TicketsSolver::Permutator::next_operators_permutation() noexcept
+void TicketsSolver::Permutator::next_operators_permutation() noexcept
 {
 	size_t reinit_begin = ts->opers_size - 1;
 	const size_t reinit_end = ts->opers_size - 1;
@@ -339,6 +346,8 @@ inline void TicketsSolver::Permutator::next_operators_permutation() noexcept
 inline bool TicketsSolver::Permutator::are_poses_valid() const noexcept
 {
 	//Мы не будем проверять что позиции идут по неубыванию, так как при переборе позиций это свойство сохраняется
+	//однако часть функций может специально устанавливать opers->pos равным ts->size 
+	//чтобы показать что все остальные позиции - дублёры.
 	return (ts->opers)->pos < ts->size;
 }
 
@@ -346,13 +355,13 @@ inline bool TicketsSolver::Permutator::are_poses_valid() const noexcept
 Можно однако заметить, что "a b c + +" и "a b + c +" генерируют абсолютно идентичные выражения
 
 Давайте выпишем все похожие выражения, чтобы найти в них закономерности и отловить:
-	a b c + +		== a b + c +						(+-) means +(a) - (b)
-	a b c + (+-)	== a b (+-) c (+-)					(-+) means -(a) + (b)
-	a b c + (-+)	== a b (-+) c + == a b (+-) c (-+)
+	a b c + +       == a b + c +                        (+-) means +(a) - (b)
+	a b c + (+-)    == a b (+-) c (+-)                  (-+) means -(a) + (b) может обозначаться как ~
+	a b c + (-+)    == a b (-+) c + == a b (+-) c (-+)
 	a b c (+-) +    == a b + c (+-) ------------------------EQUAL 1
 	a b c (+-) (+-) == a b (+-) c + == a b (-+) c (-+) -----------EQUAL 2
 	a b c (+-) (-+) == a b (-+) c (+-)
-	a b c (-+) +	== a b (+-) c + == a b (-+) c (-+) -----------EQUAL 2
+	a b c (-+) +    == a b (+-) c + == a b (-+) c (-+) -----------EQUAL 2
 	a b c (-+) (+-) == a b + c (+-) ------------------------EQUAL 1
 	a b c (-+) (-+) == a b + c (-+)
 
@@ -374,48 +383,89 @@ inline bool TicketsSolver::Permutator::are_poses_valid() const noexcept
 
 /*
 Таким образом, нам следует делать проверку на дубляжи!
-	Проходим по массиву и смотрим два соседних знака,
-		если у них одинаковые позиции,
-			проверяем что они не из одинаковых вселенных(+ и *)
-		если у них соседние позиции,
-			проверяем что они не относятся к двум описанным выше случаям случаям
 
+	Для краткости можно сказать, что для соседних знаков можно ввести минимальное расстояние, diff_factor.
+	если расстояние между операторами меньше этого фактора, они обязательно окажутся дублёром некой другой конфигурации.
+
+	Описать это можно так: если знаки из разных вселенных (+ и *) то diff_factor между ними нулевой.
+	Если они из одинаковых вселенных, то 1 за исключением двух случаев ([-][~] и [~][~]) -
+	эти операторы не могут быть даже на соседних позициях, поэтому их фактор равен 2.
 */
+
+
+const unsigned TicketsSolver::Permutator::diff_factor[TicketsSolver::OPERATORS_COUNT][TicketsSolver::OPERATORS_COUNT] =
+{
+	{ 1, 1, 1, 0, 0 }, // + все знаки из того же множества (+-~) имеют diff_factor = 1
+	{ 1, 1, 2, 0, 0 }, // - все знаки из того же множество имеют ненулевой фактор. конфигурация [-][~] особенная
+	{ 1, 1, 2, 0, 0 }, // ~ все знаки из того же множество имеют ненулевой фактор. конфигурация [~][~] особенная
+	{ 0, 0, 0, 1, 1 }, // * все знаки из множества умножения (*/) имеют diff_factor = 1
+	{ 0, 0, 0, 1, 1 }  // / все знаки из множества умножения (*/) имеют diff_factor = 1
+};
+
 
 //проверяет дубляжи. Если не проходит проверку на валидность - возвращается false
 inline bool TicketsSolver::Permutator::is_doubled() const noexcept
 {
 	if (!are_poses_valid()) return false;
 
-	auto i = ts->opers + ts->opers_size - 1, j = i - 1;
-	auto const i_end = ts->opers;
-	for (; i != i_end; i--, j--) {
-		if (i->pos == j->pos)
-		{
-			if (CheckForSamePos(i, j)) //says that it is a double
-				return true;
+	auto j = ts->opers + ts->opers_size - 1, i = j - 1;
+	auto const j_end = ts->opers;
+	for (; j != j_end; i--, j--) {
+		if (j->pos - i->pos < diff_factor[i->sign][j->sign]) return true;
+	}
+	return false;
+}
 
-		}
-		else if (i->pos == j->pos + 1)
-		{
-			if (CheckForNeighbourPos(i, j)) //says that it is a double
-				return true;
+
+
+
+//ФУНКЦИЯ ОПИЫВАЮЩАЯ ПЕРЕБОР ПОЗИЦИЙ ОПЕРАТОРОВ С УЧЁТОМ ДУБЛЕЙ
+//идём с конца в начало и смотрим можем ли мы поднять некий элемент с учётом diff_factor.
+bool TicketsSolver::Permutator::next_operators_configuration() noexcept
+{
+	token* const opers_last = ts->opers + ts->opers_size - 1;
+	token* i = opers_last - 1;
+	token* j = opers_last;
+	auto const i_end = ts->opers;
+	unsigned num = ts->opers_size;
+
+	for (; i >= i_end; i--, j--, num--) {
+		unsigned max_pos = j->pos - diff_factor[i->sign][j->sign];
+		if (i->pos < max_pos) {
+			i->pos++;
+			//сбрасываем ужо прошедшие позиции с учётом diff_factor!
+			minimize_pos(j, num, opers_last);
+			return true;
 		}
 	}
 	return false;
 }
 
-//возвращает является ли данная конфигурация из двух операторов в одном месте дублером
-inline bool TicketsSolver::Permutator::CheckForSamePos(const token* i, const token* j) noexcept
+
+//пытается составить минимальную уникальную конфигурацию позиций операторов. Если удаётся, возвращает true
+bool TicketsSolver::Permutator::min_unique_pos() noexcept
 {
-	return (IS_SUMMARY(i->sign) && IS_SUMMARY(j->sign)) || (IS_MULTIPLE(i->sign) && IS_MULTIPLE(j->sign));
+	token* i = ts->opers;
+	token* j = i + 1;
+	token* const last = ts->opers + ts->opers_size - 1;
+	unsigned num = 2;
+	for (i->pos = 1; j <= last; i++, j++, num++) {
+		unsigned min_value = i->pos + diff_factor[i->sign][j->sign];
+		if (min_value > ts->opers_size) return false;
+		j->pos = (min_value > num) ? min_value : num;
+	}
+	return true;
 }
 
-inline bool TicketsSolver::Permutator::CheckForNeighbourPos(const token* i, const token* j) noexcept
+//функция аналогична min_unique_pos на промежутке [begin, end). Однако при вызове данной функции мы заранее знаем что минимизация возможна.
+void TicketsSolver::Permutator::minimize_pos(TicketsSolver::token* begin, unsigned num, TicketsSolver::token* end) noexcept
 {
-	return (i->sign == MINUS_PLUS) && (j->sign == MINUS_PLUS || j->sign == MINUS);
-	//почему данные конфигурации - дублеры см. выше
+	for (auto j = begin, i = begin - 1; j < end; j++, i++, num++) {
+		unsigned min_value = diff_factor[i->sign][j->sign] + i->pos;
+		j->pos = (min_value > num) ? min_value : num;
+	}
 }
+
 
 //проверяет что оператор принадлежит к классу { +, (+-), (-+) }
 inline bool TicketsSolver::IS_SUMMARY(const OPERATORS op) noexcept
@@ -527,9 +577,9 @@ inline void TicketsSolver::Evaluator::move(Rational* a, Rational* const _begin) 
 
 //при создании REVERSED_NOTATION воспользуемся макросом, так как большая часть кода неудобно повторяется
 #define REVERSED_NOTATION_OPERATOR(sign)    []                                  \
-	(const TicketsSolver::str_token& a, const TicketsSolver::str_token& b)      \
-	-> TicketsSolver::str_token                                                 \
-	{ return { a.str + " " + b.str + " " + sign, TicketsSolver::EXPR }; }       \
+    (const TicketsSolver::str_token& a, const TicketsSolver::str_token& b)      \
+    -> TicketsSolver::str_token                                                 \
+    { return { a.str + " " + b.str + " " + sign, TicketsSolver::EXPR }; }       \
 
 
 
@@ -545,9 +595,9 @@ const TicketsSolver::binary_func<TicketsSolver::str_token> TicketsSolver::REVERS
 
 #undef REVERSED_NOTATION_OPERATOR
 
-#define lambda	[]                                                              \
-	(const TicketsSolver::str_token& a, const TicketsSolver::str_token& b)      \
-	-> TicketsSolver::str_token                                                 \
+#define lambda  []                                                              \
+    (const TicketsSolver::str_token& a, const TicketsSolver::str_token& b)      \
+    -> TicketsSolver::str_token                                                 \
 
 
 
