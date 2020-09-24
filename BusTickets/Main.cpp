@@ -19,7 +19,7 @@ int main() {
 	auto begin_time = std::chrono::steady_clock::now();
 	while (ts.data[length - 1].numer < 10) {
 
-		if (ts.find_first_solution() != 0) {
+		if (ts.count_of_solutions() != 0) {
 			count++;
 		}
 		ts.data[0].numer++;
