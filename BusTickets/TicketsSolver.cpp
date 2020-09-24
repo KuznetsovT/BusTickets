@@ -439,7 +439,7 @@ bool TicketsSolver::Permutator::next_operators_configuration() noexcept
 	}
 	return false;
 }
-#include <iostream>
+
 
 //пытается составить минимальную уникальную конфигурацию позиций операторов. Если удаётся, возвращает true
 bool TicketsSolver::Permutator::min_unique_pos() noexcept
