@@ -14,14 +14,24 @@ int main() {
 
 	TicketsSolver ts(length, _goal, arr);
 
-	unsigned count = 0;
 
 	auto begin_time = std::chrono::steady_clock::now();
+
 	while (ts.data[length - 1].numer < 10) {
 
-		if (ts.count_of_solutions() != 0) {
-			count++;
+
+		ts.permutator.WORKING_OPERATORS = ts.permutator.NO_DIVISION;
+		if (!ts.find_first_solution()) {
+			ts.permutator.WORKING_OPERATORS = ts.permutator.NORMAL_EVALUATION;
+			unsigned normal_count = ts.count_of_solutions();
+			if (normal_count != 0) {
+				for (auto i = ts.data, _end = ts.data + ts.size; i != _end; i++) {
+					std::cout << i->numer << " ";
+				}
+				std::cout << " : " << normal_count << std::endl;
+			}
 		}
+		
 		ts.data[0].numer++;
 		for (auto i = ts.data, j = ts.data + 1; i != ts.data + length - 1; i++, j++) {
 			if (i->numer == 10) {
@@ -32,8 +42,8 @@ int main() {
 	}
 	auto end_time = std::chrono::steady_clock::now();
 
-	std::cout << "COUNT : " << count << 
-	" TIME : " << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - begin_time).count() << " ms\n";
+	std::cout << std::endl << " TIME : " << 
+	std::chrono::duration_cast<std::chrono::milliseconds>(end_time - begin_time).count() << " ms\n";
 	return 0;
 }
 
