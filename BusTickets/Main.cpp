@@ -3,11 +3,11 @@
 #include <iostream>
 #include <fstream>
 
-#define length 6
-#define _goal 100
+#define length 3
+#define _goal 3
 
 int main() {
-	unsigned arr[length] = { 0, 0, 0, 0, 0, 0 };
+	unsigned arr[length] = { 0 };
 	std::cout << "INPUT. PRINT 6 NATURAL NUMBERS: ";
 	for (auto& i : arr) { std::cin >> i; }
 	TicketsSolver ts(length, _goal, arr);

@@ -239,9 +239,15 @@ public:
 		Rational* list = nullptr;
 		//связь с обьектом TicketsSolver
 		TicketsSolver* ts = nullptr;
+
+		//нам нужна бинарная функция, которой будет передоваться флаг проверки на корректность
+		typedef Rational(*safe_operator)(const Rational&, const Rational&, bool& flag);
 	public:
 		//централизованное хранилище для всех нужных нам операторов
-		static const binary_func<Rational> rational_lib[];
+		static const safe_operator rational_lib[];
+
+		//контейнер, который сопоставляет оператору выполняющую функцию в случае когда мы честно считаем значение без проверок
+		static const binary_func<Rational> honestly_lib[];
 
 		//функция производит нужные вычисления если происходит деление на 0 возвращает INF
 		Rational evaluate() const noexcept; //если промежуточный результат отрицательный - возвращает -1
