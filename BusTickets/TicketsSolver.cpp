@@ -488,12 +488,21 @@ inline bool TicketsSolver::IS_MULTIPLE(const OPERATORS op) noexcept
 //Определяем массив функций которые будет вызываться вычислителем
 
 //контейнер, который сопоставляет оператору выполняющую функцию
-const TicketsSolver::binary_func<Rational> TicketsSolver::Evaluator::rational_lib[] = {
-	   [](const Rational& a, const Rational& b) {return a + b; },
-	   [](const Rational& a, const Rational& b) {return a - b; },
-	   [](const Rational& a, const Rational& b) {return -a + b; },
-	   [](const Rational& a, const Rational& b) {return a * b; },
-	   [](const Rational& a, const Rational& b) {return a / b; }
+const TicketsSolver::Evaluator::safe_operator TicketsSolver::Evaluator::rational_lib[] = {
+	   [](const Rational& a, const Rational& b, bool& flag) { return a + b; },
+	   [](const Rational& a, const Rational& b, bool& flag) { if (a < b) { flag = false; return Rational(-1); } else return a - b; },
+	   [](const Rational& a, const Rational& b, bool& flag) { if (!(a < b)) { flag = false; return Rational(-1); } else return -a + b; },
+	   [](const Rational& a, const Rational& b, bool& flag) { return a * b; },
+	   [](const Rational& a, const Rational& b, bool& flag) { if (b.IS_NULL()) { flag = false; return Rational::INF; } else return a / b; }
+};
+
+//контейнер, который сопоставляет оператору выполняющую функцию в случае когда мы честно считаем значение без проверок
+const TicketsSolver::binary_func<Rational> TicketsSolver::Evaluator::honestly_lib[] = {
+	   [](const Rational& a, const Rational& b) { return a + b; },
+	   [](const Rational& a, const Rational& b) { return a - b; },
+	   [](const Rational& a, const Rational& b) { return -a + b; },
+	   [](const Rational& a, const Rational& b) { return a * b; },
+	   [](const Rational& a, const Rational& b) { return a / b; }
 };
 
 //связываем вычислитель с решателем и создаём list, использующийся в качестве черновика.
@@ -520,11 +529,12 @@ inline Rational TicketsSolver::Evaluator::evaluate() const noexcept
 	for (auto _begin = list; i != _end; i++, _begin++) {
 		auto b_iter = list + i->pos;
 		auto a_iter = b_iter - 1;
-		if (i->sign == DIVIDE && b_iter->IS_NULL()) return Rational::INF;
-		*b_iter = rational_lib[i->sign](*a_iter, *b_iter);
+		bool flag = true;
+		*b_iter = rational_lib[i->sign](*a_iter, *b_iter, flag);
+		//если деление на ноль, или
 		//если пром. результат отрицательный, значит 
 		//если один из знаков суммы поменять на другой знак суммы  - получится положительный результат
-		if (b_iter->is_negative()) return Rational(-1);
+		if (!flag) return *b_iter;
 		move(a_iter, _begin);
 	}
 
@@ -539,8 +549,8 @@ Rational TicketsSolver::Evaluator::evaluate_honestly() const noexcept
 	for (auto _begin = list; i != _end; i++, _begin++) {
 		auto b_iter = list + i->pos;
 		auto a_iter = b_iter - 1;
-
-		*b_iter = rational_lib[i->sign](*a_iter, *b_iter);
+		bool flag = true;
+		*b_iter = honestly_lib[i->sign](*a_iter, *b_iter);
 
 
 		move(a_iter, _begin);
