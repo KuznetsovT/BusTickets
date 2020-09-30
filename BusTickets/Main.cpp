@@ -4,13 +4,13 @@
 #include <fstream>
 #include <chrono>
 
-#define length 6
+#define length 3
 #define _goal 100
 
 // в данной реализации нам видны приватные поля TS для большей эффективности 
 
 int main() {
-	unsigned arr[length] = { 0, 0, 0, 0, 0, 0 };
+	unsigned arr[length] = { 0, 0, 0 };
 
 	TicketsSolver ts(length, _goal, arr);
 
@@ -24,11 +24,11 @@ int main() {
 		if (!ts.find_first_solution()) {
 			ts.permutator.WORKING_OPERATORS = ts.permutator.NORMAL_EVALUATION;
 			unsigned normal_count = ts.count_of_solutions();
-			if (normal_count != 0) {
+			if (normal_count == 1) {
 				for (auto i = ts.data, _end = ts.data + ts.size; i != _end; i++) {
 					std::cout << i->numer << " ";
 				}
-				std::cout << " : " << normal_count << std::endl;
+				std::cout << " : " << normal_count << "  " << ts.first_solution() << std::endl;
 			}
 		}
 		
