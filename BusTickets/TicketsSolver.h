@@ -218,7 +218,7 @@ public:
 
 		/*в массиве содержится информация какое минимально расстояние должно быть между соседними знаками,
 		чтобы они не оказались дубляжом другой расстановки знаков*/
-		const static unsigned diff_factor[NORMAL_EVALUATION][NORMAL_EVALUATION];
+		const static unsigned diff_factor[OPERATORS_COUNT][OPERATORS_COUNT];
 
 		//на отрезке [begin, end) устанавливает минимальную недублированную конфигурацию позиций операторов
 		void minimize_pos(TicketsSolver::token* begin, unsigned num, TicketsSolver::token* end) noexcept;
@@ -239,9 +239,15 @@ public:
 		Rational* list = nullptr;
 		//связь с обьектом TicketsSolver
 		TicketsSolver* ts = nullptr;
+
+		//нам нужна бинарная функция, которой будет передоваться флаг проверки на корректность
+		typedef Rational(*safe_operator)(const Rational&, const Rational&, bool& flag);
 	public:
 		//централизованное хранилище для всех нужных нам операторов
-		static const binary_func<Rational> rational_lib[];
+		static const safe_operator rational_lib[];
+
+		//контейнер, который сопоставляет оператору выполняющую функцию в случае когда мы честно считаем значение без проверок
+		static const binary_func<Rational> honestly_lib[];
 
 		//функция производит нужные вычисления если происходит деление на 0 возвращает INF
 		Rational evaluate() const noexcept; //если промежуточный результат отрицательный - возвращает -1
@@ -305,9 +311,9 @@ public:
 	//cвязываем обьект типа StrConverter с обьектом типа TicketsSolver
 	friend void init(TicketsSolver* ts, StrConverter& sc);
 
-	//||||||||||||||||||||||||||||||||||||||||||||||||||
-	friend int main();
-	//||||||||||||||||||||||||||||||||||||||||||||||||||
+	//////////////////////////////////////////////////////////////////////////
+	int main();
+	//////////////////////////////////////////////////////////////////////////
 };
 
 
