@@ -137,15 +137,15 @@ bool TicketsSolver::next_solution() noexcept
 {
 	if (!permutator.are_signs_valid()) return false;                                  //START CONDITIONS
 	if (!permutator.is_doubled()) {                                                   //
-	    if (!permutator.next_operators_configuration()) goto sign_increase;           //
+		if (!permutator.next_operators_configuration()) goto sign_increase;           //
 	}
-	else {                                                                            //
-	    do permutator.next_operators_permutation(); while (permutator.is_doubled());  //
-	    if (!permutator.are_poses_valid()) goto sign_increase;                        //
+	else {                                                                          //
+		do permutator.next_operators_permutation(); while (permutator.is_doubled());  //
+		if (!permutator.are_poses_valid()) goto sign_increase;                        //
 	}
 	do {
 		do {                                                    //POS INCREASE
-		    if (goal == evaluator.evaluate()) return true;      //
+			if (goal == evaluator.evaluate()) return true;      //
 		} while (permutator.next_operators_configuration());    //
 
 	sign_increase:   //GOTO SIGN INCREASE
@@ -240,7 +240,7 @@ void TicketsSolver::Permutator::reinit_pos() noexcept { reinit_pos(0, ts->opers_
 
 //WARNING: не проводится проверки что end <= opers_size
 
-/*инициализация происходит в виде [ 1, 2, 3, 4, 5, 6...]
+/*инициализация позиций происходит в виде [ 1, 2, 3, 4, 5, 6...]
 Параметр характеризует минимальное инициализируемое значение
 (обычно это значение предыдущего элемента перед begin).
 Это нужно чтобы гарантировать неубываемость последовательности
@@ -269,7 +269,8 @@ void TicketsSolver::Permutator::last_pos_configuration() noexcept
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
-//Реализация перебора знаков
+
+//!!!!!!!!!!!!!!!!!!!!!!РЕАЛИЗАЦИЯ ПЕРЕБОРА ЗНАКОВ!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 /*
 Опишем алгоритм перебора знаков и их положений.
@@ -282,7 +283,7 @@ void TicketsSolver::Permutator::last_pos_configuration() noexcept
 
 inline bool TicketsSolver::Permutator::are_signs_valid() const noexcept
 {
-	return (ts->opers)->sign < OPERATORS_COUNT;
+	return (ts->opers)->sign < WORKING_OPERATORS;
 }
 
 
@@ -294,7 +295,7 @@ inline void TicketsSolver::Permutator::next_sign_configuration() noexcept
 
 	i->sign++;
 	for (; i != i_end; i--, i_prev--) {
-		if (i->sign == OPERATORS_COUNT) {
+		if (i->sign == WORKING_OPERATORS) {
 			i_prev->sign++;
 			i->sign = 0;
 		}
@@ -354,13 +355,13 @@ inline bool TicketsSolver::Permutator::are_poses_valid() const noexcept
 Можно однако заметить, что "a b c + +" и "a b + c +" генерируют абсолютно идентичные выражения
 
 Давайте выпишем все похожие выражения, чтобы найти в них закономерности и отловить:
-	a b c + +		== a b + c +						(+-) means +(a) - (b)
-	a b c + (+-)	== a b (+-) c (+-)					(-+) means -(a) + (b) может обозначаться как ~
-	a b c + (-+)	== a b (-+) c + == a b (+-) c (-+)
+	a b c + +       == a b + c +                        (+-) means +(a) - (b)
+	a b c + (+-)    == a b (+-) c (+-)                  (-+) means -(a) + (b) может обозначаться как ~
+	a b c + (-+)    == a b (-+) c + == a b (+-) c (-+)
 	a b c (+-) +    == a b + c (+-) ------------------------EQUAL 1
 	a b c (+-) (+-) == a b (+-) c + == a b (-+) c (-+) -----------EQUAL 2
 	a b c (+-) (-+) == a b (-+) c (+-)
-	a b c (-+) +	== a b (+-) c + == a b (-+) c (-+) -----------EQUAL 2
+	a b c (-+) +    == a b (+-) c + == a b (-+) c (-+) -----------EQUAL 2
 	a b c (-+) (+-) == a b + c (+-) ------------------------EQUAL 1
 	a b c (-+) (-+) == a b + c (-+)
 
@@ -392,7 +393,7 @@ inline bool TicketsSolver::Permutator::are_poses_valid() const noexcept
 */
 
 
-const unsigned TicketsSolver::Permutator::diff_factor[TicketsSolver::Permutator::NORMAL_EVALUATION][TicketsSolver::Permutator::NORMAL_EVALUATION] =
+const unsigned TicketsSolver::Permutator::diff_factor[TicketsSolver::OPERATORS_COUNT][TicketsSolver::OPERATORS_COUNT] =
 {
 	{ 1, 1, 1, 0, 0 }, // + все знаки из того же множества (+-~) имеют diff_factor = 1
 	{ 1, 1, 2, 0, 0 }, // - все знаки из того же множество имеют ненулевой фактор. конфигурация [-][~] особенная
@@ -439,7 +440,7 @@ bool TicketsSolver::Permutator::next_operators_configuration() noexcept
 	}
 	return false;
 }
-#include <iostream>
+
 
 //пытается составить минимальную уникальную конфигурацию позиций операторов. Если удаётся, возвращает true
 bool TicketsSolver::Permutator::min_unique_pos() noexcept
@@ -487,12 +488,21 @@ inline bool TicketsSolver::IS_MULTIPLE(const OPERATORS op) noexcept
 //Определяем массив функций которые будет вызываться вычислителем
 
 //контейнер, который сопоставляет оператору выполняющую функцию
-const TicketsSolver::binary_func<Rational> TicketsSolver::Evaluator::rational_lib[] = {
-	   [](const Rational& a, const Rational& b) {return a + b; },
-	   [](const Rational& a, const Rational& b) {return a - b; },
-	   [](const Rational& a, const Rational& b) {return -a + b; },
-	   [](const Rational& a, const Rational& b) {return a * b; },
-	   [](const Rational& a, const Rational& b) {return a / b; }
+const TicketsSolver::Evaluator::safe_operator TicketsSolver::Evaluator::rational_lib[] = {
+	   [](const Rational& a, const Rational& b, bool& flag) { return a + b; },
+	   [](const Rational& a, const Rational& b, bool& flag) { if (a < b) { flag = false; return Rational(-1); } else return a - b; },
+	   [](const Rational& a, const Rational& b, bool& flag) { if (!(a < b)) { flag = false; return Rational(-1); } else return -a + b; },
+	   [](const Rational& a, const Rational& b, bool& flag) { return a * b; },
+	   [](const Rational& a, const Rational& b, bool& flag) { if (b.IS_NULL()) { flag = false; return Rational::INF; } else return a / b; }
+};
+
+//контейнер, который сопоставляет оператору выполняющую функцию в случае когда мы честно считаем значение без проверок
+const TicketsSolver::binary_func<Rational> TicketsSolver::Evaluator::honestly_lib[] = {
+	   [](const Rational& a, const Rational& b) { return a + b; },
+	   [](const Rational& a, const Rational& b) { return a - b; },
+	   [](const Rational& a, const Rational& b) { return -a + b; },
+	   [](const Rational& a, const Rational& b) { return a * b; },
+	   [](const Rational& a, const Rational& b) { return a / b; }
 };
 
 //связываем вычислитель с решателем и создаём list, использующийся в качестве черновика.
@@ -519,11 +529,12 @@ inline Rational TicketsSolver::Evaluator::evaluate() const noexcept
 	for (auto _begin = list; i != _end; i++, _begin++) {
 		auto b_iter = list + i->pos;
 		auto a_iter = b_iter - 1;
-		if (i->sign == DIVIDE && b_iter->IS_NULL()) return Rational::INF;
-		*b_iter = rational_lib[i->sign](*a_iter, *b_iter);
+		bool flag = true;
+		*b_iter = rational_lib[i->sign](*a_iter, *b_iter, flag);
+		//если деление на ноль, или
 		//если пром. результат отрицательный, значит 
 		//если один из знаков суммы поменять на другой знак суммы  - получится положительный результат
-		if (b_iter->is_negative()) return Rational(-1);
+		if (!flag) return *b_iter;
 		move(a_iter, _begin);
 	}
 
@@ -538,8 +549,8 @@ Rational TicketsSolver::Evaluator::evaluate_honestly() const noexcept
 	for (auto _begin = list; i != _end; i++, _begin++) {
 		auto b_iter = list + i->pos;
 		auto a_iter = b_iter - 1;
-
-		*b_iter = rational_lib[i->sign](*a_iter, *b_iter);
+		bool flag = true;
+		*b_iter = honestly_lib[i->sign](*a_iter, *b_iter);
 
 
 		move(a_iter, _begin);
