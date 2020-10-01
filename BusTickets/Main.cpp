@@ -4,13 +4,13 @@
 #include <fstream>
 #include <chrono>
 
-#define length 3
+#define length 7
 #define _goal 100
 
 // в данной реализации нам видны приватные поля TS для большей эффективности 
 
 int main() {
-	unsigned arr[length] = { 0, 0, 0 };
+	unsigned arr[length] = { 0 };
 
 	TicketsSolver ts(length, _goal, arr);
 
