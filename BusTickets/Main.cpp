@@ -3,8 +3,8 @@
 #include <iostream>
 #include <fstream>
 
-#define length 3
-#define _goal 3
+#define length 6
+#define _goal 100
 
 int main() {
 	unsigned arr[length] = { 0 };
