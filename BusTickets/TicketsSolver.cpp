@@ -158,7 +158,7 @@ bool TicketsSolver::next_solution() noexcept
 unsigned TicketsSolver::count_of_solutions() noexcept
 {
 	unsigned count = 0;
-	FOR_ALL_SOLUTIONS_(count++;)
+	FOR_ALL_SOLUTIONS_(++count;)
 	return count;
 }
 
@@ -171,7 +171,7 @@ std::map<Rational, unsigned> TicketsSolver::map_of_goals() noexcept
                     
 		if (permutator.min_unique_pos()) do {
 			Rational val = evaluator.evaluate();
-			if (!val.IS_INF() && !val.is_negative()) goals[val]++;
+			if (!val.IS_INF() && !val.is_negative()) ++goals[val];
 
 		} while (permutator.next_operators_configuration());
 
@@ -211,7 +211,7 @@ void TicketsSolver::init_data(const unsigned* int_data)
 {
 	Rational* d = data, * const end = data + size;
 	str_token* str_d = str_data;
-	for (const auto* i = int_data; d != end; d++, i++, str_d++) {
+	for (const auto* i = int_data; d != end; ++d, ++i, ++str_d) {
 		*d = Rational(*i);
 		*str_d = { std::to_string(*i), TicketsSolver::NUM };
 	}
@@ -230,7 +230,7 @@ void TicketsSolver::Permutator::reinit_signs(const unsigned begin, const unsigne
 {
 	auto i = ts->opers + begin;
 	auto const i_end = ts->opers + end;
-	for (; i < i_end; i++) i->sign = OPERATORS(0);
+	for (; i < i_end; ++i) i->sign = OPERATORS(0);
 }
 
 void TicketsSolver::Permutator::reinit_signs() noexcept { reinit_signs(0, ts->opers_size); }
@@ -249,7 +249,7 @@ void TicketsSolver::Permutator::reinit_pos(const unsigned begin, const unsigned 
 	size_t val = begin + 1;
 	auto i = ts->opers + begin;
 	auto const i_end = ts->opers + end;
-	for (; i < i_end; i++, val++) i->pos = (min_value < val) ? val : min_value;
+	for (; i < i_end; ++i, ++val) i->pos = (min_value < val) ? val : min_value;
 }
 
 //аналогично вызову reinit_pos(begin, end, 0);
@@ -258,13 +258,13 @@ void TicketsSolver::Permutator::reinit_pos(const unsigned begin, const unsigned 
 	size_t val = begin + 1;
 	auto i = ts->opers + begin;
 	auto const i_end = ts->opers + end;
-	for (; i < i_end; i++, val++) i->pos = val;
+	for (; i < i_end; ++i, ++val) i->pos = val;
 }
 
 
 void TicketsSolver::Permutator::last_pos_configuration() noexcept
 {
-	for (token* i = ts->opers, *_end = ts->opers + ts->opers_size; i != _end; i++) i->pos = ts->opers_size;
+	for (token* i = ts->opers, *_end = ts->opers + ts->opers_size; i != _end; ++i) i->pos = ts->opers_size;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -293,10 +293,10 @@ void TicketsSolver::Permutator::next_sign_configuration() noexcept
 	auto i_prev = i - 1;
 	auto const i_end = ts->opers;
 
-	i->sign++;
-	for (; i != i_end; i--, i_prev--) {
+	++(i->sign);
+	for (; i != i_end; --i, --i_prev) {
 		if (i->sign == WORKING_OPERATORS) {
-			i_prev->sign++;
+			++(i_prev->sign);
 			i->sign = 0;
 		}
 		else {
@@ -331,14 +331,14 @@ void TicketsSolver::Permutator::next_operators_permutation() noexcept
 	auto i = ts->opers + ts->opers_size - 2;
 	auto const i_end = ts->opers;
 
-	for (; i > i_end; i--, reinit_begin--) {
+	for (; i > i_end; --i, --reinit_begin) {
 		if (i->pos != ts->opers_size) {
-			i->pos++;
+			++(i->pos);
 			reinit_pos(reinit_begin, reinit_end, i->pos);
 			return;
 		}
 	}
-	(ts->opers)->pos++;
+	++(ts->opers->pos);
 	reinit_pos(1u, reinit_end, (ts->opers)->pos);
 }
 
@@ -412,7 +412,7 @@ bool TicketsSolver::Permutator::is_doubled() const noexcept
 
 	auto j = ts->opers + ts->opers_size - 1, i = j - 1;
 	auto const j_end = ts->opers;
-	for (; j != j_end; i--, j--) {
+	for (; j != j_end; --i, --j) {
 		if (j->pos - i->pos < diff_factor[i->sign][j->sign]) return true;
 	}
 	return false;
@@ -431,10 +431,10 @@ bool TicketsSolver::Permutator::next_operators_configuration() noexcept
 	auto const i_end = ts->opers;
 	unsigned num = ts->opers_size;
 
-	for (; i >= i_end; i--, j--, num--) {
+	for (; i >= i_end; --i, --j, --num) {
 		unsigned max_pos = j->pos - diff_factor[i->sign][j->sign];
 		if (i->pos < max_pos) {
-			i->pos++;
+			++(i->pos);
 			//сбрасываем ужо прошедшие позиции с учётом diff_factor!
 			minimize_pos(j, num, opers_last); 
 			return true;
@@ -451,7 +451,7 @@ bool TicketsSolver::Permutator::min_unique_pos() noexcept
 	token * j = i + 1;
 	token *const last = ts->opers + ts->opers_size -1;
 	unsigned num = 2;
-	for (i->pos = 1; j <= last; i++, j++, num++) {
+	for (i->pos = 1; j <= last; ++i, ++j, ++num) {
 		unsigned min_value = i->pos + diff_factor[i->sign][j->sign];
 		if (min_value > ts->opers_size) return false;
 		j->pos = (min_value > num) ? min_value : num;
@@ -462,7 +462,7 @@ bool TicketsSolver::Permutator::min_unique_pos() noexcept
 //функция аналогична min_unique_pos на промежутке [begin, end). Однако при вызове данной функции мы заранее знаем что минимизация возможна.
 void TicketsSolver::Permutator::minimize_pos(TicketsSolver::token* begin, unsigned num, TicketsSolver::token* end) noexcept
 {
-	for(auto j = begin, i = begin-1; j<end; j++, i++, num++) {
+	for(auto j = begin, i = begin-1; j<end; ++j, ++i, ++num) {
 		unsigned min_value = diff_factor[i->sign][j->sign] + i->pos;
 		j->pos = (min_value > num) ? min_value : num;
 	}
@@ -559,7 +559,7 @@ Rational TicketsSolver::Evaluator::evaluate() const noexcept  //если про�
 	init_list();
 	auto i = ts->opers;
 	auto const _end = ts->opers + ts->opers_size;
-	for (auto _begin = list; i != _end; i++, _begin++) {
+	for (auto _begin = list; i != _end; ++i, ++_begin) {
 		auto b_iter = list + i->pos;
 		auto a_iter = b_iter - 1;
 		bool flag = true;
@@ -580,7 +580,7 @@ Rational TicketsSolver::Evaluator::evaluate_honestly() const noexcept
 	init_list();
 	auto i = ts->opers;
 	auto const _end = ts->opers + ts->opers_size;
-	for (auto _begin = list; i != _end; i++, _begin++) {
+	for (auto _begin = list; i != _end; ++i, ++_begin) {
 		auto b_iter = list + i->pos;
 		auto a_iter = b_iter - 1;
 		bool flag = true;
@@ -599,13 +599,13 @@ void TicketsSolver::Evaluator::init_list() const noexcept
 	Rational* i = list;
 	Rational* const end = list + ts->size;
 	auto j = ts->data;
-	for (; i != end; i++, j++) { *i = *j; }
+	for (; i != end; ++i, ++j) { *i = *j; }
 }
 
 
 void TicketsSolver::Evaluator::move(Rational* a, Rational* const _begin) noexcept
 {
-	for (Rational* for_copy = a - 1; for_copy >= _begin; a--, for_copy--) {
+	for (Rational* for_copy = a - 1; for_copy >= _begin; --a, --for_copy) {
 		*a = *for_copy;
 	}
 }
@@ -712,7 +712,7 @@ std::string TicketsSolver::StrConverter::convert(const TicketsSolver::FLAG NOTAT
 	init_str_list();
 	auto i = ts->opers;
 	auto const _end = ts->opers + ts->opers_size;
-	for (auto _begin = str_list; i != _end; i++, _begin++) {
+	for (auto _begin = str_list; i != _end; ++i, ++_begin) {
 		auto b_iter = str_list + i->pos;
 		auto a_iter = b_iter - 1;
 		//NOTATION = binary_func<str_token>[]//
@@ -730,13 +730,13 @@ void TicketsSolver::StrConverter::init_str_list() const noexcept
 	str_token* i = str_list;
 	str_token* const end = str_list + ts->size;
 	auto j = ts->str_data;
-	for (; i != end; i++, j++) *i = *j;
+	for (; i != end; ++i, ++j) *i = *j;
 }
 
 //после вычисления очередного числа нужно сдвинуть элементы в списке
 void TicketsSolver::StrConverter::move(str_token* a, str_token* const _begin) noexcept
 {
-	for (str_token* for_copy = a - 1; for_copy >= _begin; a--, for_copy--) {
+	for (str_token* for_copy = a - 1; for_copy >= _begin; --a, --for_copy) {
 		*a = *for_copy;
 	}
 }
