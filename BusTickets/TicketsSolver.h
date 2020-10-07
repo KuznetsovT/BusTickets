@@ -30,7 +30,7 @@
 
 
 class TicketsSolver {
-private:
+protected:
 	//тип - бинарная функция для двух аргументов, например { return a+b; }
 	template<class T> using binary_func = T(*)(const T&, const T&);
 	//cтруктура для организации отображения решений в str
@@ -84,7 +84,7 @@ public:
 	//хранит конфигурацию следующего решения, если решений нет,возвращает false
 	bool next_solution() noexcept;
 
-private:
+protected:
 	/*
 	* Чтобы не отслеживать унарный минус
 	* для простоты используем список из 5 операторов
@@ -141,7 +141,7 @@ private:
 
 	const unsigned size, opers_size;     //opers_size = size-1
 public:	Rational goal;                 //значение которое нужно получить
-private:
+protected:
 
 	//массив рациональных чисел между которыми нужно расставить знаки арифметических действий
 	Rational* data = nullptr;
@@ -165,8 +165,11 @@ public:
 	private:
 		TicketsSolver* ts = nullptr;
 	public:
+		//конструктор по-умолчанию - бесполезен
 		Permutator() = default;
+		//связываем с решателем
 		Permutator(TicketsSolver* const ts) : ts(ts) {}
+		virtual ~Permutator() = default;
 
 		//перед поиском решений производим инициализацию массива
 		void init_opers() noexcept;
@@ -236,7 +239,7 @@ public:
 	private:
 
 		//черновой лист на котором будут происходить вычисления
-		Rational* list = nullptr;
+		mutable Rational* list = nullptr;
 		//связь с обьектом TicketsSolver
 		TicketsSolver* ts = nullptr;
 
@@ -255,9 +258,12 @@ public:
 		//честно до конца производит все вычисления
 		Rational evaluate_honestly() const noexcept;
 
-		//связывает Evaluator и TicketsSolver а так же производит выделение памяти по лист
-		friend void init(TicketsSolver*, Evaluator& e);
-
+		//конструктор по умолчанию - бесполезен
+		Evaluator() = default;
+		//Конструктор который связывает вычислитель с решателем. Создаёт list который используется как вычислительная доска.
+		Evaluator(TicketsSolver* ts);
+		//Оператор присваивания, если нужно связать уже существующий вычислитель с решателем.
+		Evaluator & operator=(const Evaluator& e);
 		virtual ~Evaluator();
 
 	private:
@@ -269,7 +275,6 @@ public:
 
 	} evaluator; //у каждого TicketsSolver есть свой Evaluator
 
-private:
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -283,7 +288,7 @@ public:
 	private:
 
 		//массив на котором будет происходить генерация выходной строки
-		TicketsSolver::str_token* str_list = nullptr;
+		mutable TicketsSolver::str_token* str_list = nullptr;
 		//связь с обьектом TicketsSolver
 		TicketsSolver* ts = nullptr;
 	public:
@@ -291,9 +296,13 @@ public:
 		//метод вычисляющий строковое представление нашей конфигурации
 		std::string convert(const FLAG notation = NORMAL_NOTATION) const noexcept;
 
-		//cвязываем обьект типа StrConverter с обьектом типа TicketsSolver
-		friend void init(TicketsSolver* ts, StrConverter& sc);
-
+		
+		//конструктор по умолчанию - бесполезен
+		StrConverter() = default;
+		//конструктор связывает экземпляр с решателем
+		StrConverter(TicketsSolver* ts);
+		//Связываем уже существующий str_converter с решателем
+		StrConverter& operator=(const StrConverter& sc);
 		virtual ~StrConverter();
 
 	private:
@@ -305,23 +314,12 @@ public:
 
 	} str_converter;  //у каждого TicketsSolver есть свой StrConverter
 
-	//связывает Evaluator и TicketsSolver а так же производит выделение памяти по лист
-	friend void init(TicketsSolver*, Evaluator& e);
 
-	//cвязываем обьект типа StrConverter с обьектом типа TicketsSolver
-	friend void init(TicketsSolver* ts, StrConverter& sc);
 };
 
 
-//связывает Evaluator и TicketsSolver а так же производит выделение памяти по лист
-void init(TicketsSolver*, TicketsSolver::Evaluator& e);
-
-//cвязываем обьект типа StrConverter с обьектом типа TicketsSolver
-void init(TicketsSolver* ts, TicketsSolver::StrConverter& sc);
 
 
-
-///////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////

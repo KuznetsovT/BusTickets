@@ -73,8 +73,8 @@ TicketsSolver::TicketsSolver(unsigned n, Rational goal, const unsigned* int_data
 	str_data = new str_token[size];
 
 	permutator = Permutator(this);
-	init(this, evaluator);
-	init(this, str_converter);
+	evaluator = Evaluator(this);
+	str_converter = StrConverter(this);
 
 	init_data(int_data);
 	permutator.init_opers();
@@ -486,41 +486,72 @@ inline bool TicketsSolver::IS_MULTIPLE(const OPERATORS op) noexcept
 
 //Определяем массив функций которые будет вызываться вычислителем
 
-//контейнер, который сопоставляет оператору выполняющую функцию
+//контейнер, который сопоставляет оператору выполняющую функцию. Проверяем дополнительные условия.
 const TicketsSolver::Evaluator::safe_operator TicketsSolver::Evaluator::rational_lib[] = {
-	   [](const Rational& a, const Rational& b, bool& flag) { return a + b; },
-	   [](const Rational& a, const Rational& b, bool& flag) { if (a < b) { flag = false; return Rational(-1); } else return a - b; },
-	   [](const Rational& a, const Rational& b, bool& flag) { if (!(a < b)) { flag = false; return Rational(-1); } else return -a + b; },
-	   [](const Rational& a, const Rational& b, bool& flag) { return a * b; },
-	   [](const Rational& a, const Rational& b, bool& flag) { if (b.IS_NULL()) { flag = false; return Rational::INF; } else return a / b; }
+		[](const Rational& a, const Rational& b, bool& flag) {
+			return a + b; 
+		},
+		[](const Rational& a, const Rational& b, bool& flag) { 
+			if (a < b) { 
+				flag = false;       //промежуточные значения не должны быть отрицательными см. evaluate
+				return Rational(-1); 
+			} else return a - b; 
+		},
+		[](const Rational& a, const Rational& b, bool& flag) { 
+			if (!(a < b)) { 
+				flag = false;       //промежуточные значения не должны быть отрицательными см. evaluate
+				return Rational(-1); 
+			} else return -a + b; 
+		},
+		[](const Rational& a, const Rational& b, bool& flag) {
+			return a * b;
+		},
+		[](const Rational& a, const Rational& b, bool& flag) { 
+			if (0 == b.numer) { 
+				flag = false;       //проверяем деление на ноль, дополнительно по флагам см. evaluate
+				return Rational::INF; 
+			} else return a / b;
+		}
 };
+
+
 
 //контейнер, который сопоставляет оператору выполняющую функцию в случае когда мы честно считаем значение без проверок
 const TicketsSolver::binary_func<Rational> TicketsSolver::Evaluator::honestly_lib[] = {
-	   [](const Rational& a, const Rational& b) { return a + b; },
-	   [](const Rational& a, const Rational& b) { return a - b; },
-	   [](const Rational& a, const Rational& b) { return -a + b; },
-	   [](const Rational& a, const Rational& b) { return a * b; },
-	   [](const Rational& a, const Rational& b) { return a / b; }
+		[](const Rational& a, const Rational& b) { return  a + b; },
+		[](const Rational& a, const Rational& b) { return  a - b; },
+		[](const Rational& a, const Rational& b) { return -a + b; },
+		[](const Rational& a, const Rational& b) { return  a * b; },
+		[](const Rational& a, const Rational& b) { return  a / b; }
 };
 
-//связываем вычислитель с решателем и создаём list, использующийся в качестве черновика.
-void init(TicketsSolver* ts, TicketsSolver::Evaluator& e)
+
+//Конструктор связывающий вычислитель с решателем и выделяющий память под вычислительную доску(list)
+TicketsSolver::Evaluator::Evaluator(TicketsSolver* ts) : ts(ts)
 {
-	e.ts = ts;
-	delete[] e.list;
-	e.list = new Rational[ts->size];
+	list = new Rational[ts->size];
 }
 
+//Оператор присваивания, если нужно связать уже существующий вычислитель с решателем.
+TicketsSolver::Evaluator& TicketsSolver::Evaluator::operator=(const Evaluator& e)
+{
+	this->ts = e.ts;
+
+	delete[] this->list;
+	this->list = new Rational[this->ts->size];
+
+	return *this;
+}
 
 TicketsSolver::Evaluator::~Evaluator()
 {
 	delete[] list;
+	list = nullptr;
 }
 
 
-
-inline Rational TicketsSolver::Evaluator::evaluate() const noexcept
+//функция производит нужные вычисления если происходит деление на 0 возвращает INF
+inline Rational TicketsSolver::Evaluator::evaluate() const noexcept  //если промежуточный результат отрицательный - возвращает -1
 {
 	init_list();
 	auto i = ts->opers;
@@ -540,7 +571,8 @@ inline Rational TicketsSolver::Evaluator::evaluate() const noexcept
 	return list[ts->opers_size]; //возвращает последнее оставшееся значение
 }
 
-Rational TicketsSolver::Evaluator::evaluate_honestly() const noexcept
+//честно до конца производит все вычисления
+inline Rational TicketsSolver::Evaluator::evaluate_honestly() const noexcept
 {
 	init_list();
 	auto i = ts->opers;
@@ -647,18 +679,27 @@ const TicketsSolver::binary_func<TicketsSolver::str_token> TicketsSolver::NORMAL
 
 #undef lambda
 
+
+
 //связываем вычислитель с решателем и создаём str_list, использующийся в качестве черновика.
-void init(TicketsSolver* ts, TicketsSolver::StrConverter& sc)
+TicketsSolver::StrConverter::StrConverter(TicketsSolver* ts) : ts(ts)
 {
-	sc.ts = ts;
-	delete[] sc.str_list;
-	sc.str_list = new TicketsSolver::str_token[ts->size];
+	str_list = new str_token[ts->size];
 }
 
+//Связываем уже существующий str_converter с решателем
+TicketsSolver::StrConverter& TicketsSolver::StrConverter::operator=(const StrConverter& sc)
+{
+	this->ts = sc.ts;
+	delete[] str_list;
+	str_list = new TicketsSolver::str_token[ts->size];
+	return *this;
+}
 
 TicketsSolver::StrConverter::~StrConverter()
 {
 	delete[] str_list;
+	str_list = nullptr;
 }
 
 
