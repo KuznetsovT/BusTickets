@@ -207,7 +207,7 @@ bool TicketsSolver::find_first_solution() noexcept
 //методы инициализации и реинициализации массива операторов
 
 
-inline void TicketsSolver::init_data(const unsigned* int_data)
+void TicketsSolver::init_data(const unsigned* int_data)
 {
 	Rational* d = data, * const end = data + size;
 	str_token* str_d = str_data;
@@ -217,7 +217,7 @@ inline void TicketsSolver::init_data(const unsigned* int_data)
 	}
 }
 
-inline void TicketsSolver::Permutator::init_opers() noexcept
+void TicketsSolver::Permutator::init_opers() noexcept
 {
 	reinit_signs(0, ts->opers_size);
 	reinit_pos(0, ts->opers_size);
@@ -233,7 +233,7 @@ void TicketsSolver::Permutator::reinit_signs(const unsigned begin, const unsigne
 	for (; i < i_end; i++) i->sign = OPERATORS(0);
 }
 
-inline void TicketsSolver::Permutator::reinit_signs() noexcept { reinit_signs(0, ts->opers_size); }
+void TicketsSolver::Permutator::reinit_signs() noexcept { reinit_signs(0, ts->opers_size); }
 
 void TicketsSolver::Permutator::reinit_pos() noexcept { reinit_pos(0, ts->opers_size); }
 
@@ -279,14 +279,15 @@ void TicketsSolver::Permutator::last_pos_configuration() noexcept
 ..тут стоит оговориться что при n числах у нас n-1 оператор.
 */
 
-
+/*
 inline bool TicketsSolver::Permutator::are_signs_valid() const noexcept
 {
 	return (ts->opers)->sign < WORKING_OPERATORS;
 }
+*/
 
 
-inline void TicketsSolver::Permutator::next_sign_configuration() noexcept
+void TicketsSolver::Permutator::next_sign_configuration() noexcept
 {
 	auto i = ts->opers + ts->opers_size - 1;
 	auto i_prev = i - 1;
@@ -341,6 +342,7 @@ void TicketsSolver::Permutator::next_operators_permutation() noexcept
 	reinit_pos(1u, reinit_end, (ts->opers)->pos);
 }
 
+/*
 //проверка позиций на валидность
 inline bool TicketsSolver::Permutator::are_poses_valid() const noexcept
 {
@@ -349,6 +351,7 @@ inline bool TicketsSolver::Permutator::are_poses_valid() const noexcept
 	//чтобы показать что все остальные позиции - дублёры.
 	return (ts->opers)->pos < ts->size;
 }
+*/
 
 /*
 Можно однако заметить, что "a b c + +" и "a b + c +" генерируют абсолютно идентичные выражения
@@ -403,7 +406,7 @@ const unsigned TicketsSolver::Permutator::diff_factor[TicketsSolver::OPERATORS_C
 
 
 //проверяет дубляжи. Если не проходит проверку на валидность - возвращается false
-inline bool TicketsSolver::Permutator::is_doubled() const noexcept
+bool TicketsSolver::Permutator::is_doubled() const noexcept
 {
 	if (!are_poses_valid()) return false;
 
@@ -465,7 +468,7 @@ void TicketsSolver::Permutator::minimize_pos(TicketsSolver::token* begin, unsign
 	}
 }
 
-
+/*
 //проверяет что оператор принадлежит к классу { +, (+-), (-+) }
 inline constexpr bool TicketsSolver::IS_SUMMARY(const OPERATORS op) noexcept
 {
@@ -477,7 +480,7 @@ inline constexpr bool TicketsSolver::IS_MULTIPLE(const OPERATORS op) noexcept
 {
 	return !IS_SUMMARY(op);
 }
-
+*/
 
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
@@ -551,7 +554,7 @@ TicketsSolver::Evaluator::~Evaluator()
 
 
 //функция производит нужные вычисления если происходит деление на 0 возвращает INF
-inline Rational TicketsSolver::Evaluator::evaluate() const noexcept  //если промежуточный результат отрицательный - возвращает -1
+Rational TicketsSolver::Evaluator::evaluate() const noexcept  //если промежуточный результат отрицательный - возвращает -1
 {
 	init_list();
 	auto i = ts->opers;
@@ -572,7 +575,7 @@ inline Rational TicketsSolver::Evaluator::evaluate() const noexcept  //если 
 }
 
 //честно до конца производит все вычисления
-inline Rational TicketsSolver::Evaluator::evaluate_honestly() const noexcept
+Rational TicketsSolver::Evaluator::evaluate_honestly() const noexcept
 {
 	init_list();
 	auto i = ts->opers;
@@ -591,7 +594,7 @@ inline Rational TicketsSolver::Evaluator::evaluate_honestly() const noexcept
 }
 
 
-inline void TicketsSolver::Evaluator::init_list() const noexcept
+void TicketsSolver::Evaluator::init_list() const noexcept
 {
 	Rational* i = list;
 	Rational* const end = list + ts->size;
@@ -600,7 +603,7 @@ inline void TicketsSolver::Evaluator::init_list() const noexcept
 }
 
 
-inline void TicketsSolver::Evaluator::move(Rational* a, Rational* const _begin) noexcept
+void TicketsSolver::Evaluator::move(Rational* a, Rational* const _begin) noexcept
 {
 	for (Rational* for_copy = a - 1; for_copy >= _begin; a--, for_copy--) {
 		*a = *for_copy;
@@ -704,7 +707,7 @@ TicketsSolver::StrConverter::~StrConverter()
 
 
 //Функция высчиывает строковое представление выражения
-inline std::string TicketsSolver::StrConverter::convert(const TicketsSolver::FLAG NOTATION) const noexcept
+std::string TicketsSolver::StrConverter::convert(const TicketsSolver::FLAG NOTATION) const noexcept
 {
 	init_str_list();
 	auto i = ts->opers;
@@ -722,7 +725,7 @@ inline std::string TicketsSolver::StrConverter::convert(const TicketsSolver::FLA
 
 
 //инициализируем лист для вычислений. ОБРАТИТЕ ВНИМАНИЕ - пользуемся Rational::numerator
-inline void TicketsSolver::StrConverter::init_str_list() const noexcept
+void TicketsSolver::StrConverter::init_str_list() const noexcept
 {
 	str_token* i = str_list;
 	str_token* const end = str_list + ts->size;
@@ -731,7 +734,7 @@ inline void TicketsSolver::StrConverter::init_str_list() const noexcept
 }
 
 //после вычисления очередного числа нужно сдвинуть элементы в списке
-inline void TicketsSolver::StrConverter::move(str_token* a, str_token* const _begin) noexcept
+void TicketsSolver::StrConverter::move(str_token* a, str_token* const _begin) noexcept
 {
 	for (str_token* for_copy = a - 1; for_copy >= _begin; a--, for_copy--) {
 		*a = *for_copy;
