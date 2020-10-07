@@ -92,17 +92,20 @@ protected:
 	*/
 
 	typedef unsigned OPERATORS;
-	static const OPERATORS
+	static constexpr OPERATORS
 		PLUS = 0u,    //id: 0
 		MINUS = 1u,
 		MINUS_PLUS = 2u,  //конструкция вида: -(a) + b обозначаем ~
 		MULTIPLE = 3u,
 		DIVIDE = 4u;     //id: 4
 
+	//количество знаков в нашей реализации
+	static constexpr unsigned OPERATORS_COUNT = 5u;
+
 	//проверяет что op < MULTIPLE
-	static bool IS_SUMMARY(const OPERATORS op) noexcept;
+	static constexpr bool IS_SUMMARY(const OPERATORS op) noexcept;
 	//проверяет что op >= MULTIPLE
-	static bool IS_MULTIPLE(const OPERATORS op) noexcept;
+	static constexpr bool IS_MULTIPLE(const OPERATORS op) noexcept;
 
 
 	/*
@@ -123,15 +126,14 @@ protected:
 	typedef unsigned str_id;
 
 	//определяем какие id мы даём строковым выражениям
-	static const str_id
+	static constexpr str_id
 		NUM = 0u,    //число
 		SUM = 1u,    //многочлен, сумма нескольких выражений
 		MULT = 2u,   //произведение, последний знак - умножение
 		DIV = 3u,    //частное, последний знак - деление
 		EXPR = 4u;   //сложное выражение (используется в REVERSED_NOTATION)
 
-	//количество знаков в нашей реализации
-	static const unsigned OPERATORS_COUNT = 5u;
+	
 
 	//строковое представление строим при помощи специальных токенов, где у каждой строки есть свой id
 	struct str_token {
@@ -190,11 +192,11 @@ public:
 	public:
 		
 		//при обычном переборе используется все 5 знаков
-		static const unsigned NORMAL_EVALUATION = OPERATORS_COUNT;
+		static constexpr unsigned NORMAL_EVALUATION = OPERATORS_COUNT;
 		//если нужен перебор тривиальных решений без деления устанавливайте в OPERATORS_SIZE  = NO_DIVISION
-		static const unsigned NO_DIVISION = 4u;
+		static constexpr unsigned NO_DIVISION = 4u;
 		//если нужен перебор только из плюсов и минусов
-		static const unsigned ONLY_SUM = 3u;
+		static constexpr unsigned ONLY_SUM = 3u;
 
 		//флаг, показывающий сколько операторов используется в переборе. Для поиска только тривиальных решений используйте NO_DIVISION
 		unsigned WORKING_OPERATORS = NORMAL_EVALUATION;
@@ -221,7 +223,14 @@ public:
 
 		/*в массиве содержится информация какое минимально расстояние должно быть между соседними знаками,
 		чтобы они не оказались дубляжом другой расстановки знаков*/
-		const static unsigned diff_factor[OPERATORS_COUNT][OPERATORS_COUNT];
+		constexpr static unsigned diff_factor[OPERATORS_COUNT][OPERATORS_COUNT] = {
+			{ 1, 1, 1, 0, 0 }, // + все знаки из того же множества (+-~) имеют diff_factor = 1
+			{ 1, 1, 2, 0, 0 }, // - все знаки из того же множество имеют ненулевой фактор. конфигурация [-][~] особенная
+			{ 1, 1, 2, 0, 0 }, // ~ все знаки из того же множество имеют ненулевой фактор. конфигурация [~][~] особенная
+			{ 0, 0, 0, 1, 1 }, // * все знаки из множества умножения (*/) имеют diff_factor = 1
+			{ 0, 0, 0, 1, 1 }  // / все знаки из множества умножения (*/) имеют diff_factor = 1
+		};
+		//подробнее - см. в cpp-файле "проверка на дубляжи"
 
 		//на отрезке [begin, end) устанавливает минимальную недублированную конфигурацию позиций операторов
 		void minimize_pos(TicketsSolver::token* begin, unsigned num, TicketsSolver::token * end) noexcept;

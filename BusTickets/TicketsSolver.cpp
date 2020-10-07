@@ -391,16 +391,16 @@ inline bool TicketsSolver::Permutator::are_poses_valid() const noexcept
 	эти операторы не могут быть даже на соседних позициях, поэтому их фактор равен 2.
 */
 
-
-const unsigned TicketsSolver::Permutator::diff_factor[TicketsSolver::OPERATORS_COUNT][TicketsSolver::OPERATORS_COUNT] =
+/*
+constexpr unsigned TicketsSolver::Permutator::diff_factor[TicketsSolver::OPERATORS_COUNT][TicketsSolver::OPERATORS_COUNT] =
 {
 	{ 1, 1, 1, 0, 0 }, // + все знаки из того же множества (+-~) имеют diff_factor = 1
 	{ 1, 1, 2, 0, 0 }, // - все знаки из того же множество имеют ненулевой фактор. конфигурация [-][~] особенная
 	{ 1, 1, 2, 0, 0 }, // ~ все знаки из того же множество имеют ненулевой фактор. конфигурация [~][~] особенная
-	{ 0, 0, 0, 1, 1 }, // * все знаки из множества умножения (*/) имеют diff_factor = 1
-	{ 0, 0, 0, 1, 1 }  // / все знаки из множества умножения (*/) имеют diff_factor = 1
+	{ 0, 0, 0, 1, 1 }, // * все знаки из множества умножения (*,/) имеют diff_factor = 1
+	{ 0, 0, 0, 1, 1 }  // / все знаки из множества умножения (*,/) имеют diff_factor = 1
 };
-
+*/
 
 //проверяет дубляжи. Если не проходит проверку на валидность - возвращается false
 inline bool TicketsSolver::Permutator::is_doubled() const noexcept
@@ -467,13 +467,13 @@ void TicketsSolver::Permutator::minimize_pos(TicketsSolver::token* begin, unsign
 
 
 //проверяет что оператор принадлежит к классу { +, (+-), (-+) }
-inline bool TicketsSolver::IS_SUMMARY(const OPERATORS op) noexcept
+inline constexpr bool TicketsSolver::IS_SUMMARY(const OPERATORS op) noexcept
 {
 	return op < MULTIPLE;
 }
 
 //проверяет что оператор является оператором умножения-деления
-inline bool TicketsSolver::IS_MULTIPLE(const OPERATORS op) noexcept
+inline constexpr bool TicketsSolver::IS_MULTIPLE(const OPERATORS op) noexcept
 {
 	return !IS_SUMMARY(op);
 }
