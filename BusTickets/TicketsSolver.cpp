@@ -391,8 +391,8 @@ inline bool TicketsSolver::Permutator::are_poses_valid() const noexcept
 	эти операторы не могут быть даже на соседних позициях, поэтому их фактор равен 2.
 */
 
-/*
-constexpr unsigned TicketsSolver::Permutator::diff_factor[TicketsSolver::OPERATORS_COUNT][TicketsSolver::OPERATORS_COUNT] =
+
+const unsigned TicketsSolver::Permutator::diff_factor[TicketsSolver::OPERATORS_COUNT][TicketsSolver::OPERATORS_COUNT] =
 {
 	{ 1, 1, 1, 0, 0 }, // + все знаки из того же множества (+-~) имеют diff_factor = 1
 	{ 1, 1, 2, 0, 0 }, // - все знаки из того же множество имеют ненулевой фактор. конфигурация [-][~] особенная
@@ -400,7 +400,7 @@ constexpr unsigned TicketsSolver::Permutator::diff_factor[TicketsSolver::OPERATO
 	{ 0, 0, 0, 1, 1 }, // * все знаки из множества умножения (*,/) имеют diff_factor = 1
 	{ 0, 0, 0, 1, 1 }  // / все знаки из множества умножения (*,/) имеют diff_factor = 1
 };
-*/
+
 
 //проверяет дубляжи. Если не проходит проверку на валидность - возвращается false
 inline bool TicketsSolver::Permutator::is_doubled() const noexcept

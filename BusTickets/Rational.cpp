@@ -20,7 +20,7 @@ constexpr Rational::Rational(int numer, unsigned denumer) noexcept
 
 
 //используйте данную функцию для создания несократимой дроби
-Rational Rational::make_Rational(int numer, unsigned denumer) noexcept
+inline Rational Rational::make_Rational(int numer, unsigned denumer) noexcept
 {
 	unsigned gcd = std::gcd(numer, denumer);
 	return Rational(numer /(int) gcd, denumer / gcd);
@@ -40,7 +40,7 @@ std::ostream& operator<<(std::ostream& out, const Rational& r) noexcept
 }
 
 //return -(r)
-inline constexpr Rational operator-(const Rational& r) noexcept
+inline Rational operator-(const Rational& r) noexcept
 {
 	return Rational(-r.numer, r.denumer);
 }
@@ -72,18 +72,18 @@ Rational operator/(const Rational& l, const Rational& r) noexcept
 
 
 //return double(r)
-inline constexpr Rational::operator double() const
+inline Rational::operator double() const
 {
 	return double(numer) / double(denumer);
 }
 
 //return int(r)
-inline constexpr Rational::operator int() const
+Rational::operator int() const
 {
 	return int(operator double());
 }
 
-inline constexpr Rational Rational::reversed() const noexcept
+inline Rational Rational::reversed() const noexcept
 {
 	return Rational(denumer, numer);
 }

@@ -24,7 +24,7 @@ struct Rational {
 	//функция вывода в поток
 	friend std::ostream& operator<<(std::ostream& out, const Rational& r) noexcept;
 
-	friend constexpr Rational operator-(const Rational& r) noexcept;
+	friend Rational operator-(const Rational& r) noexcept;
 
 	friend Rational operator+(const Rational& l, const Rational& r) noexcept;
 	friend Rational operator*(const Rational& l, const Rational& r) noexcept;
@@ -37,9 +37,9 @@ struct Rational {
 	friend bool operator>(const Rational& l, const Rational& r) noexcept;
 
 
-	constexpr operator double() const;
-	constexpr operator int()  const;
-	constexpr Rational reversed() const noexcept;
+	operator double() const;
+	operator int()  const;
+	Rational reversed() const noexcept;
 
 	const static Rational INF;
 	const static Rational NaN;
@@ -56,7 +56,7 @@ struct Rational {
 
 std::ostream& operator<<(std::ostream& out, const Rational& r) noexcept;
 
-constexpr Rational operator-(const Rational& r) noexcept;
+Rational operator-(const Rational& r) noexcept;
 
 Rational operator+(const Rational& l, const Rational& r) noexcept;
 Rational operator*(const Rational& l, const Rational& r) noexcept;
