@@ -15,7 +15,7 @@ const Rational Rational::NaN = Rational(0, 0);
 
 //проверки дроби на сокращаемость не происходит!
 //используйте make_Rational для создания несократимой дроби
-Rational::Rational(int numer, unsigned denumer) noexcept
+constexpr Rational::Rational(int numer, unsigned denumer) noexcept
 	: numer(numer), denumer(denumer) {}
 
 
@@ -40,7 +40,7 @@ std::ostream& operator<<(std::ostream& out, const Rational& r) noexcept
 }
 
 //return -(r)
-inline Rational operator-(const Rational& r) noexcept
+inline constexpr Rational operator-(const Rational& r) noexcept
 {
 	return Rational(-r.numer, r.denumer);
 }
@@ -64,7 +64,7 @@ Rational operator-(const Rational& l, const Rational& r) noexcept
 }
 
 //return l / r
-Rational operator/(const Rational& l, const Rational& r)
+Rational operator/(const Rational& l, const Rational& r) noexcept
 {
 	return l * r.reversed();
 }
@@ -72,18 +72,18 @@ Rational operator/(const Rational& l, const Rational& r)
 
 
 //return double(r)
-inline Rational::operator double() const
+inline constexpr Rational::operator double() const
 {
 	return double(numer) / double(denumer);
 }
 
 //return int(r)
-inline Rational::operator int() const
+inline constexpr Rational::operator int() const
 {
 	return int(operator double());
 }
 
-inline Rational Rational::reversed() const
+inline constexpr Rational Rational::reversed() const noexcept
 {
 	return Rational(denumer, numer);
 }

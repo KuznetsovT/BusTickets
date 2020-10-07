@@ -15,7 +15,7 @@ struct Rational {
 
 
 	//конструктор не проверяет дробь на сокращаемость - используйте make_rational
-	Rational(int numer = 0, unsigned denumer = 1) noexcept;
+	constexpr Rational(int numer = 0, unsigned denumer = 1) noexcept;
 
 	//создаёт несократимую дробь
 	static Rational make_Rational(int numer = 0, unsigned denumer = 1) noexcept;
@@ -24,12 +24,12 @@ struct Rational {
 	//функция вывода в поток
 	friend std::ostream& operator<<(std::ostream& out, const Rational& r) noexcept;
 
-	friend Rational operator-(const Rational& r) noexcept;
+	friend constexpr Rational operator-(const Rational& r) noexcept;
 
 	friend Rational operator+(const Rational& l, const Rational& r) noexcept;
 	friend Rational operator*(const Rational& l, const Rational& r) noexcept;
 	friend Rational operator-(const Rational& l, const Rational& r) noexcept;
-	friend Rational operator/(const Rational& l, const Rational& r);
+	friend Rational operator/(const Rational& l, const Rational& r) noexcept;
 
 
 	friend bool operator==(const Rational& l, const Rational& r) noexcept;
@@ -37,9 +37,9 @@ struct Rational {
 	friend bool operator>(const Rational& l, const Rational& r) noexcept;
 
 
-	operator double() const;
-	operator int()  const;
-	Rational reversed() const;
+	constexpr operator double() const;
+	constexpr operator int()  const;
+	constexpr Rational reversed() const noexcept;
 
 	const static Rational INF;
 	const static Rational NaN;
@@ -56,12 +56,12 @@ struct Rational {
 
 std::ostream& operator<<(std::ostream& out, const Rational& r) noexcept;
 
-Rational operator-(const Rational& r) noexcept;
+constexpr Rational operator-(const Rational& r) noexcept;
 
 Rational operator+(const Rational& l, const Rational& r) noexcept;
 Rational operator*(const Rational& l, const Rational& r) noexcept;
 Rational operator-(const Rational& l, const Rational& r) noexcept;
-Rational operator/(const Rational& l, const Rational& r);
+Rational operator/(const Rational& l, const Rational& r) noexcept;
 
 
 bool operator==(const Rational& l, const Rational& r) noexcept;
