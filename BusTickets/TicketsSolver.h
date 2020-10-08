@@ -30,7 +30,7 @@
 
 
 class TicketsSolver {
-private:
+protected:
 	//тип - бинарная функция для двух аргументов, например { return a+b; }
 	template<class T> using binary_func = T(*)(const T&, const T&);
 	//cтруктура для организации отображения решений в str
@@ -84,7 +84,7 @@ public:
 	//хранит конфигурацию следующего решения, если решений нет,возвращает false
 	bool next_solution() noexcept;
 
-private:
+protected:
 	/*
 	* Чтобы не отслеживать унарный минус
 	* для простоты используем список из 5 операторов
@@ -92,17 +92,20 @@ private:
 	*/
 
 	typedef unsigned OPERATORS;
-	static const OPERATORS
+	static constexpr OPERATORS
 		PLUS = 0u,    //id: 0
 		MINUS = 1u,
 		MINUS_PLUS = 2u,  //конструкция вида: -(a) + b обозначаем ~
 		MULTIPLE = 3u,
 		DIVIDE = 4u;     //id: 4
 
+	//количество знаков в нашей реализации
+	static constexpr unsigned OPERATORS_COUNT = 5u;
+
 	//проверяет что op < MULTIPLE
-	static bool IS_SUMMARY(const OPERATORS op) noexcept;
+	static constexpr bool IS_SUMMARY(const OPERATORS op) noexcept;
 	//проверяет что op >= MULTIPLE
-	static bool IS_MULTIPLE(const OPERATORS op) noexcept;
+	static constexpr bool IS_MULTIPLE(const OPERATORS op) noexcept;
 
 
 	/*
@@ -123,15 +126,14 @@ private:
 	typedef unsigned str_id;
 
 	//определяем какие id мы даём строковым выражениям
-	static const str_id
+	static constexpr str_id
 		NUM = 0u,    //число
 		SUM = 1u,    //многочлен, сумма нескольких выражений
 		MULT = 2u,   //произведение, последний знак - умножение
 		DIV = 3u,    //частное, последний знак - деление
 		EXPR = 4u;   //сложное выражение (используется в REVERSED_NOTATION)
 
-	//количество знаков в нашей реализации
-	static const unsigned OPERATORS_COUNT = 5u;
+
 
 	//строковое представление строим при помощи специальных токенов, где у каждой строки есть свой id
 	struct str_token {
@@ -141,7 +143,7 @@ private:
 
 	const unsigned size, opers_size;     //opers_size = size-1
 public:	Rational goal;                 //значение которое нужно получить
-private:
+protected:
 
 	//массив рациональных чисел между которыми нужно расставить знаки арифметических действий
 	Rational* data = nullptr;
@@ -165,8 +167,11 @@ public:
 	private:
 		TicketsSolver* ts = nullptr;
 	public:
+		//конструктор по-умолчанию - бесполезен
 		Permutator() = default;
+		//связываем с решателем
 		Permutator(TicketsSolver* const ts) : ts(ts) {}
+		virtual ~Permutator() = default;
 
 		//перед поиском решений производим инициализацию массива
 		void init_opers() noexcept;
@@ -187,11 +192,11 @@ public:
 	public:
 
 		//при обычном переборе используется все 5 знаков
-		static const unsigned NORMAL_EVALUATION = OPERATORS_COUNT;
+		static constexpr unsigned NORMAL_EVALUATION = OPERATORS_COUNT;
 		//если нужен перебор тривиальных решений без деления устанавливайте в OPERATORS_SIZE  = NO_DIVISION
-		static const unsigned NO_DIVISION = 4u;
+		static constexpr unsigned NO_DIVISION = 4u;
 		//если нужен перебор только из плюсов и минусов
-		static const unsigned ONLY_SUM = 3u;
+		static constexpr unsigned ONLY_SUM = 3u;
 
 		//флаг, показывающий сколько операторов используется в переборе. Для поиска только тривиальных решений используйте NO_DIVISION
 		unsigned WORKING_OPERATORS = NORMAL_EVALUATION;
@@ -219,6 +224,7 @@ public:
 		/*в массиве содержится информация какое минимально расстояние должно быть между соседними знаками,
 		чтобы они не оказались дубляжом другой расстановки знаков*/
 		const static unsigned diff_factor[OPERATORS_COUNT][OPERATORS_COUNT];
+		//подробнее - см. в cpp-файле "проверка на дубляжи"
 
 		//на отрезке [begin, end) устанавливает минимальную недублированную конфигурацию позиций операторов
 		void minimize_pos(TicketsSolver::token* begin, unsigned num, TicketsSolver::token* end) noexcept;
@@ -236,7 +242,7 @@ public:
 	private:
 
 		//черновой лист на котором будут происходить вычисления
-		Rational* list = nullptr;
+		mutable Rational* list = nullptr;
 		//связь с обьектом TicketsSolver
 		TicketsSolver* ts = nullptr;
 
@@ -255,9 +261,12 @@ public:
 		//честно до конца производит все вычисления
 		Rational evaluate_honestly() const noexcept;
 
-		//связывает Evaluator и TicketsSolver а так же производит выделение памяти по лист
-		friend void init(TicketsSolver*, Evaluator& e);
-
+		//конструктор по умолчанию - бесполезен
+		Evaluator() = default;
+		//Конструктор который связывает вычислитель с решателем. Создаёт list который используется как вычислительная доска.
+		Evaluator(TicketsSolver* ts);
+		//Оператор присваивания, если нужно связать уже существующий вычислитель с решателем.
+		Evaluator& operator=(const Evaluator& e);
 		virtual ~Evaluator();
 
 	private:
@@ -269,7 +278,6 @@ public:
 
 	} evaluator; //у каждого TicketsSolver есть свой Evaluator
 
-private:
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -283,7 +291,7 @@ public:
 	private:
 
 		//массив на котором будет происходить генерация выходной строки
-		TicketsSolver::str_token* str_list = nullptr;
+		mutable TicketsSolver::str_token* str_list = nullptr;
 		//связь с обьектом TicketsSolver
 		TicketsSolver* ts = nullptr;
 	public:
@@ -291,9 +299,13 @@ public:
 		//метод вычисляющий строковое представление нашей конфигурации
 		std::string convert(const FLAG notation = NORMAL_NOTATION) const noexcept;
 
-		//cвязываем обьект типа StrConverter с обьектом типа TicketsSolver
-		friend void init(TicketsSolver* ts, StrConverter& sc);
 
+		//конструктор по умолчанию - бесполезен
+		StrConverter() = default;
+		//конструктор связывает экземпляр с решателем
+		StrConverter(TicketsSolver* ts);
+		//Связываем уже существующий str_converter с решателем
+		StrConverter& operator=(const StrConverter& sc);
 		virtual ~StrConverter();
 
 	private:
@@ -305,23 +317,12 @@ public:
 
 	} str_converter;  //у каждого TicketsSolver есть свой StrConverter
 
-	//связывает Evaluator и TicketsSolver а так же производит выделение памяти по лист
-	friend void init(TicketsSolver*, Evaluator& e);
 
-	//cвязываем обьект типа StrConverter с обьектом типа TicketsSolver
-	friend void init(TicketsSolver* ts, StrConverter& sc);
 };
 
 
-//связывает Evaluator и TicketsSolver а так же производит выделение памяти по лист
-void init(TicketsSolver*, TicketsSolver::Evaluator& e);
-
-//cвязываем обьект типа StrConverter с обьектом типа TicketsSolver
-void init(TicketsSolver* ts, TicketsSolver::StrConverter& sc);
 
 
-
-///////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
