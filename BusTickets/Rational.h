@@ -15,7 +15,7 @@ struct Rational {
 
 
 	//конструктор не проверяет дробь на сокращаемость - используйте make_rational
-	inline constexpr Rational(int numer = 0, unsigned denumer = 1) noexcept;
+	constexpr Rational(int numer = 0, unsigned denumer = 1) noexcept;
 
 	//создаёт несократимую дробь
 	static Rational make_Rational(int numer = 0, unsigned denumer = 1) noexcept;
