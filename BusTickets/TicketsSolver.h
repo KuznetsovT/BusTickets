@@ -325,39 +325,6 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
-
-//Inline методы
-
-//проверяет конфигурацию на валидность
-inline bool TicketsSolver::Permutator::are_signs_valid() const noexcept
-{
-	return (ts->opers)->sign < WORKING_OPERATORS;
-}
-
-//проверка позиций на валидность
-inline bool TicketsSolver::Permutator::are_poses_valid() const noexcept
-{
-	//Мы не будем проверять что позиции идут по неубыванию, так как при переборе позиций это свойство сохраняется
-	//однако часть функций может специально устанавливать opers->pos равным ts->size 
-	//чтобы показать что все остальные позиции - дублёры.
-	return (ts->opers)->pos < ts->size;
-}
-
-
-//проверяет что оператор принадлежит к классу { +, (+-), (-+) }
-inline constexpr bool TicketsSolver::IS_SUMMARY(const OPERATORS op) noexcept
-{
-	return op < MULTIPLE;
-}
-
-//проверяет что оператор является оператором умножения-деления
-inline constexpr bool TicketsSolver::IS_MULTIPLE(const OPERATORS op) noexcept
-{
-	return !IS_SUMMARY(op);
-}
-
-
-
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 //макрос который говорит сделать _EXPRESSION_ для каждого решения у обьекта _TS_. 

@@ -279,12 +279,12 @@ void TicketsSolver::Permutator::last_pos_configuration() noexcept
 ..тут стоит оговориться что при n числах у нас n-1 оператор.
 */
 
-/*
-inline bool TicketsSolver::Permutator::are_signs_valid() const noexcept
+
+bool TicketsSolver::Permutator::are_signs_valid() const noexcept
 {
 	return (ts->opers)->sign < WORKING_OPERATORS;
 }
-*/
+
 
 
 void TicketsSolver::Permutator::next_sign_configuration() noexcept
@@ -342,16 +342,16 @@ void TicketsSolver::Permutator::next_operators_permutation() noexcept
 	reinit_pos(1u, reinit_end, (ts->opers)->pos);
 }
 
-/*
+
 //проверка позиций на валидность
-inline bool TicketsSolver::Permutator::are_poses_valid() const noexcept
+bool TicketsSolver::Permutator::are_poses_valid() const noexcept
 {
 	//Мы не будем проверять что позиции идут по неубыванию, так как при переборе позиций это свойство сохраняется
 	//однако часть функций может специально устанавливать opers->pos равным ts->size 
 	//чтобы показать что все остальные позиции - дублёры.
 	return (ts->opers)->pos < ts->size;
 }
-*/
+
 
 /*
 Можно однако заметить, что "a b c + +" и "a b + c +" генерируют абсолютно идентичные выражения
@@ -468,19 +468,19 @@ void TicketsSolver::Permutator::minimize_pos(TicketsSolver::token* begin, unsign
 	}
 }
 
-/*
+
 //проверяет что оператор принадлежит к классу { +, (+-), (-+) }
-inline constexpr bool TicketsSolver::IS_SUMMARY(const OPERATORS op) noexcept
+constexpr bool TicketsSolver::IS_SUMMARY(const OPERATORS op) noexcept
 {
 	return op < MULTIPLE;
 }
 
 //проверяет что оператор является оператором умножения-деления
-inline constexpr bool TicketsSolver::IS_MULTIPLE(const OPERATORS op) noexcept
+constexpr bool TicketsSolver::IS_MULTIPLE(const OPERATORS op) noexcept
 {
 	return !IS_SUMMARY(op);
 }
-*/
+
 
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
