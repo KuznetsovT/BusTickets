@@ -17,7 +17,7 @@ int main() {
 
 	//потом я хочу вывести решения в обратной польской нотации
 
-	std::cout << ts.all_solutions(std::cout, TicketsSolver::REVERSED_NOTATION);
+	std::cout << ts.all_solutions(stdout, TicketsSolver::REVERSED_NOTATION);
 
 	/*
 	* но готовый метод - слишком легко, тем более что TicketsSolver  состоит из трёх классов:

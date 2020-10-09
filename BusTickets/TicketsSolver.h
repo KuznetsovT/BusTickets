@@ -2,7 +2,7 @@
 
 #include <string>
 #include <map>
-#include <ostream>
+#include <cstdio>
 
 #include "Rational.h"
 
@@ -76,7 +76,7 @@ public:
 	unsigned count_of_solutions() noexcept;
 
 	//записывает все решения в out, выводит количество записанных решений
-	unsigned all_solutions(std::ostream& out, FLAG notation = NORMAL_NOTATION) noexcept;
+	unsigned all_solutions(FILE* out = stdout, FLAG notation = NORMAL_NOTATION) noexcept;
 
 	//сбрасывает конфигурацию операторов, ищет первое решение, возвращает true если находит
 	bool find_first_solution() noexcept;
@@ -133,7 +133,7 @@ protected:
 		DIV = 3u,    //частное, последний знак - деление
 		EXPR = 4u;   //сложное выражение (используется в REVERSED_NOTATION)
 
-	
+
 
 	//строковое представление строим при помощи специальных токенов, где у каждой строки есть свой id
 	struct str_token {
@@ -184,13 +184,13 @@ public:
 		//полная реиницилизация массива
 		void reinit_signs() noexcept;
 		void reinit_pos() noexcept;
-		
+
 		//пытается построить первую(минимальную) уникальную(недублирующую) конфигурацию позиций операторов. Возвращает true, если успешно.
 		bool min_unique_pos() noexcept;
 		//переписывает позиции арифм.знаков на последние возможные позиции.(без проверки на дубляжи)
 		void last_pos_configuration() noexcept;
 	public:
-		
+
 		//при обычном переборе используется все 5 знаков
 		static constexpr unsigned NORMAL_EVALUATION = OPERATORS_COUNT;
 		//если нужен перебор тривиальных решений без деления устанавливайте в OPERATORS_SIZE  = NO_DIVISION
@@ -227,7 +227,7 @@ public:
 		//подробнее - см. в cpp-файле "проверка на дубляжи"
 
 		//на отрезке [begin, end) устанавливает минимальную недублированную конфигурацию позиций операторов
-		void minimize_pos(TicketsSolver::token* begin, unsigned num, TicketsSolver::token * end) noexcept;
+		void minimize_pos(TicketsSolver::token* begin, unsigned num, TicketsSolver::token* end) noexcept;
 
 	} permutator; //у каждого TicketsSolver есть свой Permutator
 
@@ -266,7 +266,7 @@ public:
 		//Конструктор который связывает вычислитель с решателем. Создаёт list который используется как вычислительная доска.
 		Evaluator(TicketsSolver* ts);
 		//Оператор присваивания, если нужно связать уже существующий вычислитель с решателем.
-		Evaluator & operator=(const Evaluator& e);
+		Evaluator& operator=(const Evaluator& e);
 		virtual ~Evaluator();
 
 	private:
@@ -299,7 +299,7 @@ public:
 		//метод вычисляющий строковое представление нашей конфигурации
 		std::string convert(const FLAG notation = NORMAL_NOTATION) const noexcept;
 
-		
+
 		//конструктор по умолчанию - бесполезен
 		StrConverter() = default;
 		//конструктор связывает экземпляр с решателем
