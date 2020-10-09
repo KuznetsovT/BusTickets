@@ -124,7 +124,7 @@ Rational TicketsSolver::evaluate() const noexcept
 std::string TicketsSolver::first_solution(FLAG notation) noexcept
 {
 	FOR_ALL_SOLUTIONS_(return str_converter.convert();)
-		return std::string();
+	return std::string();
 }
 
 
@@ -137,17 +137,16 @@ bool TicketsSolver::next_solution() noexcept
 {
 	if (!permutator.are_signs_valid()) return false;                                  //START CONDITIONS
 	if (!permutator.is_doubled()) {                                                   //
-		if (!permutator.next_operators_configuration()) goto sign_increase;           //
+	    if (!permutator.next_operators_configuration()) goto sign_increase;           //
+	} else {                                                                          //
+	    do permutator.next_operators_permutation(); while (permutator.is_doubled());  //
+	    if (!permutator.are_poses_valid()) goto sign_increase;                        //
 	}
-	else {                                                                          //
-		do permutator.next_operators_permutation(); while (permutator.is_doubled());  //
-		if (!permutator.are_poses_valid()) goto sign_increase;                        //
-	}
-	do {
+	do {                                                        
 		do {                                                    //POS INCREASE
-			if (goal == evaluator.evaluate()) return true;      //
+		    if (goal == evaluator.evaluate()) return true;      //
 		} while (permutator.next_operators_configuration());    //
-
+		                                                        
 	sign_increase:   //GOTO SIGN INCREASE
 		permutator.next_sign_configuration();                   //SIGN INCREASE
 		if (!permutator.are_signs_valid()) return false;        //
@@ -160,16 +159,16 @@ unsigned TicketsSolver::count_of_solutions() noexcept
 {
 	unsigned count = 0;
 	FOR_ALL_SOLUTIONS_(++count;)
-		return count;
+	return count;
 }
 
 //возвращает множество всех достижимых goals, а так же количество решений
 std::map<Rational, unsigned> TicketsSolver::map_of_goals() noexcept
 {
 	std::map<Rational, unsigned> goals;
-	for (permutator.reinit_signs(); permutator.are_signs_valid();
+	for (permutator.reinit_signs(); permutator.are_signs_valid(); 
 		permutator.next_sign_configuration()) {
-
+                    
 		if (permutator.min_unique_pos()) do {
 			Rational val = evaluator.evaluate();
 			if (!val.IS_INF() && !val.is_negative()) ++goals[val];
@@ -180,22 +179,23 @@ std::map<Rational, unsigned> TicketsSolver::map_of_goals() noexcept
 	return goals;
 }
 
+
 //выводит в поток out все нейденные решения
-unsigned TicketsSolver::all_solutions(std::ostream& out, FLAG notation) noexcept
+unsigned TicketsSolver::all_solutions(FILE * out, FLAG notation) noexcept
 {
 	unsigned count = 0;
 	FOR_ALL_SOLUTIONS_(
 		count++;
-	out << " " << goal << " = " << str_converter.convert(notation) << std::endl;
+		fprintf(out, " %d = %s\n", goal.numer, str_converter.convert(notation).c_str());
 	)
-		return count;
+	return count;
 }
 
 //возвращает есть ли у билетика решение
 bool TicketsSolver::find_first_solution() noexcept
 {
 	FOR_ALL_SOLUTIONS_(return true;)
-		return false;
+	return false;
 }
 
 
@@ -358,7 +358,7 @@ bool TicketsSolver::Permutator::are_poses_valid() const noexcept
 Можно однако заметить, что "a b c + +" и "a b + c +" генерируют абсолютно идентичные выражения
 
 Давайте выпишем все похожие выражения, чтобы найти в них закономерности и отловить:
-	a b c + +       == a b + c +                        (+-) means +(a) - (b)
+	a b c + +       == a b + c +                        (+-) means +(a) - (b) 
 	a b c + (+-)    == a b (+-) c (+-)                  (-+) means -(a) + (b) может обозначаться как ~
 	a b c + (-+)    == a b (-+) c + == a b (+-) c (-+)
 	a b c (+-) +    == a b + c (+-) ------------------------EQUAL 1
@@ -386,12 +386,12 @@ bool TicketsSolver::Permutator::are_poses_valid() const noexcept
 
 /*
 Таким образом, нам следует делать проверку на дубляжи!
-
+	
 	Для краткости можно сказать, что для соседних знаков можно ввести минимальное расстояние, diff_factor.
 	если расстояние между операторами меньше этого фактора, они обязательно окажутся дублёром некой другой конфигурации.
 
 	Описать это можно так: если знаки из разных вселенных (+ и *) то diff_factor между ними нулевой.
-	Если они из одинаковых вселенных, то 1 за исключением двух случаев ([-][~] и [~][~]) -
+	Если они из одинаковых вселенных, то 1 за исключением двух случаев ([-][~] и [~][~]) - 
 	эти операторы не могут быть даже на соседних позициях, поэтому их фактор равен 2.
 */
 
@@ -426,8 +426,8 @@ bool TicketsSolver::Permutator::is_doubled() const noexcept
 //идём с конца в начало и смотрим можем ли мы поднять некий элемент с учётом diff_factor.
 bool TicketsSolver::Permutator::next_operators_configuration() noexcept
 {
-	token* const opers_last = ts->opers + ts->opers_size - 1;
-	token* i = opers_last - 1;
+	token * const opers_last = ts->opers + ts->opers_size - 1;
+	token*  i = opers_last - 1;
 	token* j = opers_last;
 	auto const i_end = ts->opers;
 	unsigned num = ts->opers_size;
@@ -437,7 +437,7 @@ bool TicketsSolver::Permutator::next_operators_configuration() noexcept
 		if (i->pos < max_pos) {
 			++(i->pos);
 			//сбрасываем ужо прошедшие позиции с учётом diff_factor!
-			minimize_pos(j, num, opers_last);
+			minimize_pos(j, num, opers_last); 
 			return true;
 		}
 	}
@@ -448,9 +448,9 @@ bool TicketsSolver::Permutator::next_operators_configuration() noexcept
 //пытается составить минимальную уникальную конфигурацию позиций операторов. Если удаётся, возвращает true
 bool TicketsSolver::Permutator::min_unique_pos() noexcept
 {
-	token* i = ts->opers;
-	token* j = i + 1;
-	token* const last = ts->opers + ts->opers_size - 1;
+	token * i = ts->opers;
+	token * j = i + 1;
+	token *const last = ts->opers + ts->opers_size -1;
 	unsigned num = 2;
 	for (i->pos = 1; j <= last; ++i, ++j, ++num) {
 		unsigned min_value = i->pos + diff_factor[i->sign][j->sign];
@@ -463,7 +463,7 @@ bool TicketsSolver::Permutator::min_unique_pos() noexcept
 //функция аналогична min_unique_pos на промежутке [begin, end). Однако при вызове данной функции мы заранее знаем что минимизация возможна.
 void TicketsSolver::Permutator::minimize_pos(TicketsSolver::token* begin, unsigned num, TicketsSolver::token* end) noexcept
 {
-	for (auto j = begin, i = begin - 1; j < end; ++j, ++i, ++num) {
+	for(auto j = begin, i = begin-1; j<end; ++j, ++i, ++num) {
 		unsigned min_value = diff_factor[i->sign][j->sign] + i->pos;
 		j->pos = (min_value > num) ? min_value : num;
 	}
@@ -493,32 +493,29 @@ constexpr bool TicketsSolver::IS_MULTIPLE(const OPERATORS op) noexcept
 //контейнер, который сопоставляет оператору выполняющую функцию. Проверяем дополнительные условия.
 const TicketsSolver::Evaluator::safe_operator TicketsSolver::Evaluator::rational_lib[] = {
 		[](const Rational& a, const Rational& b, bool& flag) {
-			return a + b;
+			return a + b; 
+		},
+		[](const Rational& a, const Rational& b, bool& flag) { 
+			if (a < b) { 
+				flag = false;       //промежуточные значения не должны быть отрицательными см. evaluate
+				return Rational(-1); 
+			} else return a - b; 
+		},
+		[](const Rational& a, const Rational& b, bool& flag) { 
+			if (!(a < b)) { 
+				flag = false;       //промежуточные значения не должны быть отрицательными см. evaluate
+				return Rational(-1); 
+			} else return -a + b; 
 		},
 		[](const Rational& a, const Rational& b, bool& flag) {
-			if (a < b) {
-				flag = false;       //промежуточные значения не должны быть отрицательными см. evaluate
-				return Rational(-1);
-			}
- else return a - b;
-},
-[](const Rational& a, const Rational& b, bool& flag) {
-	if (!(a < b)) {
-		flag = false;       //промежуточные значения не должны быть отрицательными см. evaluate
-		return Rational(-1);
-	}
-else return -a + b;
-},
-[](const Rational& a, const Rational& b, bool& flag) {
-	return a * b;
-},
-[](const Rational& a, const Rational& b, bool& flag) {
-	if (0 == b.numer) {
-		flag = false;       //проверяем деление на ноль, дополнительно по флагам см. evaluate
-		return Rational::INF;
-	}
-else return a / b;
-}
+			return a * b;
+		},
+		[](const Rational& a, const Rational& b, bool& flag) { 
+			if (0 == b.numer) { 
+				flag = false;       //проверяем деление на ноль, дополнительно по флагам см. evaluate
+				return Rational::INF; 
+			} else return a / b;
+		}
 };
 
 

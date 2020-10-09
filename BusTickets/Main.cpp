@@ -1,10 +1,10 @@
 #include "TicketsSolver.h"
 
-#include <iostream>
-#include <fstream>
 #include <memory>
 #include <chrono>
 
+#include <cstdio>   //при помощи printf будем выводить критичные места программы
+#include <iostream> //осуществляем ввод, и вывод некритичных данных
 
 int main() {
 
@@ -22,7 +22,7 @@ int main() {
 		auto begin_time = std::chrono::steady_clock::now();
 
 		//выводим все решения в поток
-		unsigned count = ts.all_solutions(std::cout);
+		unsigned count = ts.all_solutions(); //неявно передаём сишный stdout
 
 		auto end_time = std::chrono::steady_clock::now();
 		std::cout << "\nCOUNT OF SOLUTIONS IS : " << count << "  TIME : " << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - begin_time).count() << " ms\n";
