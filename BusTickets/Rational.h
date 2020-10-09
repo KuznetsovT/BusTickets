@@ -167,7 +167,7 @@ inline Rational::operator int() const
 
 inline Rational Rational::reversed() const noexcept
 {
-	return Rational(denumer, numer);
+	return (numer >= 0) ? Rational(denumer, numer) : Rational(-(int)denumer, -numer);
 }
 
 
