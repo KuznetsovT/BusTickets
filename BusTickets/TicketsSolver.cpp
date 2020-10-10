@@ -738,6 +738,7 @@ void TicketsSolver::StrConverter::init_str_list() const noexcept
 void TicketsSolver::StrConverter::move(str_token* a, str_token* const _begin) noexcept
 {
 	for (str_token* for_copy = a - 1; for_copy >= _begin; --a, --for_copy) {
-		*a = *for_copy;
+		a->str = std::move(for_copy->str);
+		a->id = for_copy->id;
 	}
 }
