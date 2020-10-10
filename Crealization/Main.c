@@ -1,12 +1,15 @@
-#include <stdio.h>
+
 #include "Rational.h"
+#include "TIME_MEASURE.h"
+
+
 
 int main() {
-	struct Rational a, b, c;
-	a = init_Rational_by_int(2);
-	b = init_Rational(2, 4);
-	b = Make_Rational(b.numer, b.denumer);
-
-	struct Rational e = minus(b, a), q = reversed(unary_minus(b));
+	
+	TIME_MEASURE
+	(
+		for (unsigned i = 0; i < 100000; ++i) for (unsigned j = 0; j < 10000; ++j) { int h = i * j; },
+		"HARD"
+	)
 	return 0;
 }
