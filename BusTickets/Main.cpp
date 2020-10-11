@@ -22,7 +22,7 @@ int main() {
 
 		std::cout << "\nOUTPUT ->\n\n";
 		
-		TIME_MEASURE_NO_DESCRIPITON(
+		TIME_MEASURE_NO_DESCRIPTION(
 		//выводим все решения в поток
 		unsigned count = ts.all_solutions(); //неявно передаём сишный stdout
 		std::cout << "\nCOUNT OF SOLUTIONS IS : " << count;

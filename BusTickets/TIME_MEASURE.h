@@ -1,6 +1,8 @@
 #pragma once
+
 #include <time.h>
 #include <stdio.h>
+
 
 #define _ms_(time_to_cast) (((time_to_cast)/(double)CLOCKS_PER_SEC)*1000.0)
 
@@ -16,7 +18,7 @@
 
 
 
-#define TIME_MEASURE_NO_DESCRIPITON( __code__ )                                        \
+#define TIME_MEASURE_NO_DESCRIPTION( __code__ )                                        \
 {                                                                                      \
 	double __begin__ = (double) clock(); /*процессорное время*/                        \
 	{ __code__ }                                                                       \
