@@ -15,7 +15,8 @@ struct StrConverter {
 };
 
 
-
+//выделяет достаточно памяти для строкового представления выражения из size чисел
+char* static_Str_Converter_Allocate_enough(unsigned size);
 
 
 //создаёт массив со строковым представлением билетика
@@ -28,7 +29,7 @@ void* init_Str_Converter(struct StrConverter* sconv, unsigned size, const struct
 void destroy_StrConverter(struct str_token* str_list);
 
 //Конвертация арифметического выражения в строку в нормальной нотации
-char* StrConverter_normal_convert(struct StrConverter sconv);
+char* StrConverter_normal_convert(struct StrConverter sconv, char* dest);
 
 //конвертация арифметического выражения в строку в обратной нотации
-char* StrConverter_reversed_convert(struct StrConverter sconv);
+char* StrConverter_reversed_convert(struct StrConverter sconv, char* dest);

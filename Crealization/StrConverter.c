@@ -20,7 +20,6 @@ static const OPERATORS
 	MULTIPLE = 3u,
 	DIVIDE = 4u; //id: 4
 
-
 /*определим количество символов, которое тратитс€ на каждое число.
 * —чита€, что у нас длина строки пропорциональна количеству битов(в случае когда вывод в 2разр€дной системе)
 * Ќа скобки и запись знака тратим максимум 16 знаков.
@@ -73,6 +72,7 @@ const char REVERSED_NOTATION_OPERATORS[OPERATORS_COUNT] = {
 //////////////////////////////////////////////////////////////////
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
+
 //первичное заполнение листа строками  опирует строки из str_data
 static int _StrConverter_init_Str_List(struct StrConverter sconv);
 
@@ -85,10 +85,17 @@ static void _StrConverter_destroy_str_list(struct str_token* begin, struct str_t
 ///////////////////////////////////////////////////////////////////
 
 
+//выдел€ет достаточно пам€ти дл€ строкового представлени€ выражени€ из size чисел
+char* static_Str_Converter_Allocate_enough(unsigned size)
+{
+
+	return malloc(size * LETTERS_PER_NUMBER * sizeof(char));
+}
+
 //ƒл€ обратной нотации конвертаци€ происходит за один проход
 
-char* StrConverter_reversed_convert(struct StrConverter conv) {
-	char * const val = malloc(LETTERS_PER_NUMBER * conv.list_size*sizeof(char));
+char* StrConverter_reversed_convert(struct StrConverter conv, char*const val) {
+	
 	if (!val) return val;
 	char* dest = val;
 	struct token* oper = conv.opers_config.opers;
@@ -234,7 +241,7 @@ static void _StrConverter_move(struct str_token* a, struct str_token* const _beg
 
 #define _REVERSED_NOTATION_OPERATOR( SIGN )                                                              \
 {                                                                                                        \
-    struct str_token val = { malloc(str_size * LETTERS_PER_NUMBER * sizeof(char)), EXPR };               \
+    struct str_token val = { static_Str_Converter_Allocate_enough(str_size), EXPR };                     \
     if (!val.str) return val;                                                                            \
     {                                                                                                    \
         /*val.str = a.str + ' ' + b.str + ' ' + '+';  */                                                 \

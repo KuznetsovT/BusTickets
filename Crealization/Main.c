@@ -16,7 +16,7 @@ void to_do(struct Permutator per, struct Evaluator eval, struct StrConverter str
 
 	
 
-
+	char* buffer = static_Str_Converter_Allocate_enough(strconv.list_size);
 	for (Permutator_reinit_signs(per.opers_config);
 		Permutator_are_signs_valid(per); Permutator_next_sign_configuration(per))
 	{
@@ -25,14 +25,15 @@ void to_do(struct Permutator per, struct Evaluator eval, struct StrConverter str
 
 			if (Rational_equal(goal, Evaluator_evaluate(eval)))
 			{
-				char* buffer = StrConverter_reversed_convert(strconv);
-				printf(" % d/%u = %s\n", goal.numer, goal.denumer, buffer);
-				free(buffer);
+				buffer  = StrConverter_reversed_convert(strconv, buffer);
+				printf(" % d = %s\n", goal.numer, buffer);
+
 			}
 
 		} while (Permuator_next_operators_configuration(per.opers_config));
 
 	}
+	free(buffer);
 }
 
 int main() {
