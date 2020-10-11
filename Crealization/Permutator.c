@@ -1,4 +1,6 @@
 #include "Permutator.h"
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
 
 static const OPERATORS
 	PLUS = 0u,    //id: 0
@@ -7,6 +9,13 @@ static const OPERATORS
 	MULTIPLE = 3u,
 	DIVIDE = 4u; //id: 4
 
+
+//при обычном переборе используется все 5 знаков
+const unsigned NORMAL_EVALUATION = OPERATORS_COUNT;
+//если нужен перебор тривиальных решений без деления устанавливайте в OPERATORS_SIZE  = NO_DIVISION
+const unsigned NO_DIVISION = 4u;
+//если нужен перебор только из плюсов и минусов
+const unsigned ONLY_SUM = 3u;
 
 /*в массиве содержится информация какое минимально расстояние должно быть между соседними знаками,
 		чтобы они не оказались дубляжом другой расстановки знаков*/
@@ -21,7 +30,7 @@ static const unsigned diff_factor[OPERATORS_COUNT][OPERATORS_COUNT];
 
 //часто нам будет требоваться реинициализировать часть массива
 //WARNING: не проводится проверки что end <= opers_size
-static void _Permutator_reinit_signs_part(struct Permutator p, unsigned begin, unsigned end);
+static void _Permutator_reinit_signs_part(struct token* opers, unsigned begin, unsigned end);
 
 
 
@@ -32,9 +41,9 @@ static void _Permutator_reinit_signs_part(struct Permutator p, unsigned begin, u
 */
 //WARNING: не проводится проверки что end <= opers_size
 //проверяем, что все элементы после реинициализации не меньше min_value, иначе последовательность не будет неубывающей
-static void _Permutator_reinit_pos_part(struct Permutator p, unsigned begin, unsigned end, unsigned min_value);
+static void _Permutator_reinit_pos_part(struct token* opers, unsigned begin, unsigned end, unsigned min_value);
 //аналогично вызову _Permutator_reinit_part(p, begin, end, zero);
-static void _Permutator_reinit_pos_part_with_zero(struct Permutator p, const unsigned begin, const unsigned end);
+static void _Permutator_reinit_pos_part_with_zero(struct token *opers, const unsigned begin, const unsigned end);
 
 
 
@@ -49,16 +58,16 @@ static void _Permutator_minimize_pos(struct token* begin, unsigned num, struct t
 
 //методы инициализации и реинициализации массива операторов
 //полная реиницилизация массива
-void Permutator_init_opers(struct Permutator p)
+void Permutator_init_opers(struct OpersConfig op)
 {
-	Permutator_reinit_signs(p);
-	Permutator_reinit_pos(p);
+	Permutator_reinit_signs(op);
+	Permutator_reinit_pos(op);
 }
 
 
-void Permutator_reinit_signs(struct Permutator p)
+void Permutator_reinit_signs(struct OpersConfig op)
 {
-	_Permutator_reinit_signs_part(p, 0, p.opers_config->opers_size);
+	_Permutator_reinit_signs_part(op.opers, 0, op.opers_size);
 }
 
 /*инициализация позиций происходит в виде [ 1, 2, 3, 4, 5, 6...]
@@ -67,19 +76,19 @@ void Permutator_reinit_signs(struct Permutator p)
 Это нужно чтобы гарантировать неубываемость последовательности
 */
 //WARNING: не проводится проверки что end <= opers_size
-void Permutator_reinit_pos(struct Permutator p)
+void Permutator_reinit_pos(struct OpersConfig op)
 {
-	_Permutator_reinit_pos_part_with_zero(p, 0, p.opers_config->opers_size);
+	_Permutator_reinit_pos_part_with_zero(op.opers, 0, op.opers_size);
 }
 
 //..........................................................................
 //..........................................................................
 //Реинициализация части массива..
 
-static void _Permutator_reinit_signs_part(struct Permutator p, unsigned begin, unsigned end)
+static void _Permutator_reinit_signs_part(struct token* opers, unsigned begin, unsigned end)
 {
-	for (struct token* i = p.opers_config->opers + begin, 
-			* const i_end = p.opers_config->opers + end;
+	for (struct token* i = opers + begin, 
+			* const i_end = opers + end;
 		i < i_end; ++i)
 	{
 		i->sign = (OPERATORS)0u;
@@ -91,11 +100,11 @@ static void _Permutator_reinit_signs_part(struct Permutator p, unsigned begin, u
 (обычно это значение предыдущего элемента перед begin).
 Это нужно чтобы гарантировать неубываемость последовательности
 */
-static void _Permutator_reinit_pos_part(struct Permutator p, unsigned begin, unsigned end, unsigned min_value)
+static void _Permutator_reinit_pos_part(struct token* opers, unsigned begin, unsigned end, unsigned min_value)
 {
 	unsigned val = begin + 1;
-	for (struct token* i = p.opers_config->opers + begin,
-		* const i_end = p.opers_config->opers + end;
+	for (struct token* i = opers + begin,
+		* const i_end = opers + end;
 		i < i_end; ++i, ++val) 
 	{
 		i->pos = (min_value < val) ? val : min_value;
@@ -103,11 +112,11 @@ static void _Permutator_reinit_pos_part(struct Permutator p, unsigned begin, uns
 }
 
 //аналогично вызову reinit_pos(begin, end, 0); Однако сравнение с нулём в данном случае бесполезно - мы его опускаем
-static void _Permutator_reinit_pos_part_with_zero(struct Permutator p, unsigned begin, unsigned end)
+static void _Permutator_reinit_pos_part_with_zero(struct token *opers, unsigned begin, unsigned end)
 {
 	unsigned val = begin + 1;
-	for (struct token* i = p.opers_config->opers + begin,
-		* const i_end = p.opers_config->opers + end;
+	for (struct token* i = opers + begin,
+		* const i_end = opers + end;
 		i < i_end; ++i, ++val)
 	{
 		i->pos =  val;
@@ -115,13 +124,13 @@ static void _Permutator_reinit_pos_part_with_zero(struct Permutator p, unsigned 
 }
 
 //переписывает позиции арифм.знаков на последние возможные позиции.(без проверки на дубляжи)
-void Permutator_last_pos_configuration(struct Permutator p)
+void Permutator_last_pos_configuration(struct OpersConfig config)
 {
-	for (struct token* i = p.opers_config->opers,
-		*_end = p.opers_config->opers + p.opers_config->opers_size;
+	for (struct token* i = config.opers,
+		*_end = config.opers + config.opers_size;
 		i != _end; ++i)
 	{
-		i->pos = p.opers_config->opers_size;
+		i->pos = config.opers_size;
 	}
 }
 
@@ -139,7 +148,7 @@ void Permutator_last_pos_configuration(struct Permutator p)
 
 bool Permutator_are_signs_valid(const struct Permutator p)
 {
-	return p.opers_config->opers->sign < p._WORKING_OPERATORS;
+	return p.opers_config.opers->sign < p._WORKING_OPERATORS;
 }
 
 //Записывает в opers.sign следующую конфигурацию, не проверяет на валидность
@@ -150,9 +159,9 @@ bool Permutator_are_signs_valid(const struct Permutator p)
 */
 void Permutator_next_sign_configuration(struct Permutator p)
 {
-	struct token* i = p.opers_config->opers + p.opers_config->opers_size - 1;
+	struct token* i = p.opers_config.opers + p.opers_config.opers_size - 1;
 	struct token* i_prev = i - 1;
-	struct token* const i_end = p.opers_config->opers;
+	struct token* const i_end = p.opers_config.opers;
 	++(i->sign);
 	for (; i != i_end; --i, --i_prev) {
 		if (i->sign == p._WORKING_OPERATORS) {
@@ -191,32 +200,32 @@ Min_value нужно, чтобы все элементы справа не были меньше увеличенного нами элем
 */
 
 //возвращает формальную следующую престановку. Не проверяет на валидность! Не проверяет на дубляжи!
-void Permutator_next_operators_permutation(struct Permutator p)
+void Permutator_next_operators_permutation(struct OpersConfig conf)
 {
-	const unsigned reinit_end = p.opers_config->opers_size - 1;
+	const unsigned reinit_end = conf.opers_size - 1;
 	unsigned reinit_begin = reinit_end;
 	
-	struct token* i = p.opers_config->opers + p.opers_config->opers_size - 2;
-	struct token* const i_end = p.opers_config->opers;
+	struct token* i = conf.opers + conf.opers_size - 2;
+	struct token* const i_end = conf.opers;
 
 	for (; i > i_end; --i, --reinit_begin) {
-		if (i->pos != p.opers_config->opers_size) {
+		if (i->pos != conf.opers_size) {
 			++(i->pos);
-			_Permutator_reinit_pos_part(p, reinit_begin, reinit_end, i->pos);
+			_Permutator_reinit_pos_part(conf.opers, reinit_begin, reinit_end, i->pos);
 			return;
 		}
 	}
-	++(p.opers_config->opers->pos);
-	_Permutator_reinit_pos_part(p, 1u, reinit_end, (p.opers_config->opers)->pos);
+	++(conf.opers->pos);
+	_Permutator_reinit_pos_part(conf.opers, 1u, reinit_end, conf.opers->pos);
 }
 
 
 //проверка позиций на валидность
-bool Permutator_are_poses_valid(const struct Permutator p)
+bool Permutator_are_poses_valid(const struct OpersConfig conf)
 {
 	//Мы не будем проверять что позиции идут по неубыванию, так как при переборе позиций это свойство сохраняется
 	//чтобы показать что все остальные позиции - дублёры.
-	return (p.opers_config->opers)->pos <= p.opers_config->opers_size;
+	return (conf.opers)->pos <= conf.opers_size;
 }
 
 
@@ -280,14 +289,14 @@ const unsigned diff_factor[OPERATORS_COUNT][OPERATORS_COUNT] =
 
 
 //проверяет что данная позиция не является дублёром другой позиции 
-bool Permutator_is_doubled(const struct Permutator p)
+bool Permutator_is_doubled(const struct OpersConfig conf)
 {
 	//Если не проходит проверку на валидность - возвращается false
-	if (!Permutator_are_poses_valid(p)) return false;
+	if (!Permutator_are_poses_valid(conf)) return false;
 
-	struct token* j = p.opers_config->opers + p.opers_config->opers_size - 1;
+	struct token* j = conf.opers + conf.opers_size - 1;
 	struct token* i = j - 1;
-	struct token* const j_end = p.opers_config->opers;
+	struct token* const j_end = conf.opers;
 	for (; j != j_end; --i, --j) {
 		if (j->pos - i->pos < diff_factor[i->sign][j->sign]) return true;
 	}
@@ -309,13 +318,13 @@ bool Permutator_is_doubled(const struct Permutator p)
 */
 
 //пытается записать в opers следующую перестановку с ПРОВЕРКОЙ НА ДУБЛЯЖИ!
-bool Permuator_next_operators_configuration(struct Permutator p)
+bool Permuator_next_operators_configuration(struct OpersConfig config)
 {
-	struct token* const opers_last = p.opers_config->opers + p.opers_config->opers_size - 1;
+	struct token* const opers_last = config.opers + config.opers_size - 1;
 	struct token* i = opers_last - 1;
 	struct token* j = opers_last;
-	struct token* const i_end = p.opers_config->opers;
-	unsigned theoretic_min = p.opers_config->opers_size;
+	struct token* const i_end = config.opers;
+	unsigned theoretic_min = config.opers_size;
 
 	for (; i >= i_end; --i, --j, --theoretic_min) {
 		unsigned max_pos = j->pos - diff_factor[i->sign][j->sign];
@@ -333,14 +342,14 @@ bool Permuator_next_operators_configuration(struct Permutator p)
 
 
 //пытается построить первую(минимальную) уникальную(недублирующую) конфигурацию позиций операторов. Возвращает true, если успешно.
-bool Permutator_min_unique_pos(struct Permutator p) {
-	struct token* i = p.opers_config->opers;
+bool Permutator_min_unique_pos(struct OpersConfig conf) {
+	struct token* i = conf.opers;
 	struct token* j = i + 1;
-	struct token* const last = p.opers_config->opers + p.opers_config->opers_size - 1;
+	struct token* const last = conf.opers + conf.opers_size - 1;
 	unsigned num = 2; //theoretical min
 	for (i->pos = 1; j <= last; ++i, ++j, ++num) {
 		unsigned min_value = i->pos + diff_factor[i->sign][j->sign];
-		if (min_value > p.opers_config->opers_size) return false;
+		if (min_value > conf.opers_size) return false;
 		j->pos = (min_value > num) ? min_value : num;
 	}
 	return true;
@@ -353,4 +362,22 @@ void _Permutator_minimize_pos(struct token* begin, unsigned num, struct token* e
 		unsigned min_value = diff_factor[i->sign][j->sign] + i->pos;
 		j->pos = (min_value > num) ? min_value : num;
 	}
+}
+
+
+
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+//функция отладочного вывода
+void Permutator_print_opers(struct OpersConfig conf)
+{
+	printf("SIGN : ");
+	for (struct token*i = conf.opers, *const _end = conf.opers+conf.opers_size; i != _end; i++) {
+		printf("%u ", i->sign);
+	}
+	printf("\tPOS : ");
+	for (struct token* i = conf.opers, * const _end = conf.opers + conf.opers_size; i != _end; i++) {
+		printf("%u ", i->pos);
+	}
+	putchar('\n');
 }

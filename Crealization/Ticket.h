@@ -101,12 +101,5 @@ struct Ticket {
 	unsigned size;
 };
 
-////билет, у которого идёт перебор операторов
-//struct TicketConfig {
-//
-//	struct Ticket ticket;
-//	//массив токенов описывающий расстановку знаков в выражении
-//	struct OpersConfig opers_config;
-//};
 
 

@@ -11,7 +11,7 @@
 	{ __code__ }                                                                       \
 	double   __end__ = (double) clock(); /*процессорное время*/                        \
 	printf(description);                                                               \
-	printf("\tTIME : %lf ms\n", _ms_( ( __end__ - __begin__ ) ));                      \
+	printf("\tTIME : %.1lf ms\n", _ms_( ( __end__ - __begin__ ) ));                    \
 }                                                                                      \
 
 
@@ -21,7 +21,7 @@
 	double __begin__ = (double) clock(); /*процессорное время*/                        \
 	{ __code__ }                                                                       \
 	double   __end__ = (double) clock(); /*процессорное время*/                        \
-	printf("\tTIME : %lf ms\n", _ms_( ( __end__ - __begin__ ) ));                      \
+	printf("\tTIME : %.1lf ms\n", _ms_( ( __end__ - __begin__ ) ));                    \
 }                                                                                      \
 
 

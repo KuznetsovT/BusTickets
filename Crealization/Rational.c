@@ -106,6 +106,7 @@ bool Rational_less(struct Rational a, struct Rational b) {
 //нахождение НОК
 unsigned gcd(int a, int b)
 {
+	if (!a && !b) return 1u;
 	int for_swap;
 	while (a) {
 		for_swap = b % a; b = a; a = for_swap;

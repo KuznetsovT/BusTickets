@@ -16,7 +16,7 @@ struct Evaluator {
 };
 
 //конструктор
-void* init_Evaluator(struct Evaluator *eval, unsigned size, const Rational*_data, struct OpersConfig *_opers_config);
+void* init_Evaluator(struct Evaluator *eval, unsigned size, const Rational*_data, struct OpersConfig _opers_config);
 //деструктор, удаляющий динамически выделенный list
 void destroy_Evaluator(Rational *list);
 

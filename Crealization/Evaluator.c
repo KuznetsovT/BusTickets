@@ -59,7 +59,7 @@ const static safe_binary_operator_Rational rational_lib[] = {
 ////////////////////////////////////////////////////////////////////////
 
 //выделяем память для вычислительной доски
-void* init_Evaluator(struct Evaluator* eval, unsigned size, const Rational* _data, struct OpersConfig *_opers_config)
+void* init_Evaluator(struct Evaluator* eval, unsigned size, const Rational* _data, struct OpersConfig _opers_config)
 {
 	*eval = (struct Evaluator){ malloc(size * sizeof(Rational)), size, _data, _opers_config };
 	return eval->list;
@@ -87,7 +87,7 @@ Rational Evaluator_evaluate(struct Evaluator eval)
 		*b_iter = rational_lib[i->sign](*a_iter, *b_iter, &flag);
 		//если деление на ноль, или
 		//если пром. результат отрицательный, значит 
-		//если один из знаков суммы поменять на другой знак суммы  - получится положительный результат
+		//один из знаков суммы можно поменять на другой знак суммы  - получится положительный результат
 		if (!flag) return *b_iter;
 		move(a_iter, _begin);
 	}

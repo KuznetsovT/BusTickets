@@ -16,12 +16,19 @@ struct StrConverter {
 
 
 
+
+
 //создаёт массив со строковым представлением билетика
 struct str_token* static_StrConverter_init_str_data(const unsigned* data, unsigned size);
 
 //конструктор
-void* init_Str_Converter(struct StrConverter* sconv, unsigned size, const struct str_token*str_data, struct OpersConfig* _opers_config);
+void* init_Str_Converter(struct StrConverter* sconv, unsigned size, const struct str_token*str_data, struct OpersConfig _opers_config);
 
 //деструктор, удаляющий динамически выделенный list
 void destroy_StrConverter(struct str_token* str_list);
 
+//Конвертация арифметического выражения в строку в нормальной нотации
+char* StrConverter_normal_convert(struct StrConverter sconv);
+
+//конвертация арифметического выражения в строку в обратной нотации
+char* StrConverter_reversed_convert(struct StrConverter sconv);
