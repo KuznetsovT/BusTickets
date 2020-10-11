@@ -6,6 +6,8 @@
 #include <cstdio>   //при помощи printf будем выводить критичные места программы
 #include <iostream> //осуществляем ввод, и вывод некритичных данных
 
+#include "TIME_MEASURE.h"
+
 int main() {
 
 	std::cout << "INPUT <- PRINT LENGTH AND GOAL YOU NEED : ";
@@ -19,13 +21,12 @@ int main() {
 		TicketsSolver ts(length, _goal, arr.get());
 
 		std::cout << "\nOUTPUT ->\n\n";
-		auto begin_time = std::chrono::steady_clock::now();
-
+		
+		TIME_MEASURE_NO_DESCRIPITON(
 		//выводим все решения в поток
 		unsigned count = ts.all_solutions(); //неявно передаём сишный stdout
-
-		auto end_time = std::chrono::steady_clock::now();
-		std::cout << "\nCOUNT OF SOLUTIONS IS : " << count << "  TIME : " << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - begin_time).count() << " ms\n";
+		std::cout << "\nCOUNT OF SOLUTIONS IS : " << count;
+		);
 
 	} catch (std::exception e) {
 		std::cout << "\nEXCEPTION { " << e.what() << " }\n";
