@@ -110,9 +110,9 @@ inline void Rational::normalize() noexcept
 //оператор вывода Rational
 inline std::ostream& operator<<(std::ostream& out, const Rational& r) noexcept
 {
-	if (r.denumer != 1) 
+	if (r.denumer != 1)
 		out << r.numer << "/" << r.denumer;
-	else 
+	else
 		out << r.numer;
 	return out;
 }

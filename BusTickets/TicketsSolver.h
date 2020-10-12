@@ -76,7 +76,7 @@ public:
 	unsigned count_of_solutions() noexcept;
 
 	//записывает все решения в out, выводит количество записанных решений
-	unsigned all_solutions(FILE* out = stdout, FLAG notation = NORMAL_NOTATION) noexcept;
+	unsigned all_solutions(FILE *out = stdout, FLAG notation = NORMAL_NOTATION) noexcept;
 
 	//сбрасывает конфигурацию операторов, ищет первое решение, возвращает true если находит
 	bool find_first_solution() noexcept;
