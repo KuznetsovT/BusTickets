@@ -514,7 +514,7 @@ const TicketsSolver::Evaluator::safe_operator TicketsSolver::Evaluator::rational
 			if (0 == b.numer) { 
 				flag = false;       //проверяем деление на ноль, дополнительно по флагам см. evaluate
 				return Rational::INF; 
-			} else return a / b;
+			} else return a * Rational( b.denumer, b.numer );
 		}
 };
 
