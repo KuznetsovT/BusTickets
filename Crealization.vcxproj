@@ -18,6 +18,23 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Crealization\Evaluator.c" />
+    <ClCompile Include="Crealization\Main.c" />
+    <ClCompile Include="Crealization\Permutator.c" />
+    <ClCompile Include="Crealization\Rational.c" />
+    <ClCompile Include="Crealization\StrConverter.c" />
+    <ClCompile Include="Crealization\TicketsSolver.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Crealization\Evaluator.h" />
+    <ClInclude Include="Crealization\Permutator.h" />
+    <ClInclude Include="Crealization\Rational.h" />
+    <ClInclude Include="Crealization\StrConverter.h" />
+    <ClInclude Include="Crealization\Ticket.h" />
+    <ClInclude Include="Crealization\TicketsSolver.h" />
+    <ClInclude Include="Crealization\TIME_MEASURE.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -143,23 +160,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="Evaluator.c" />
-    <ClCompile Include="Main.c" />
-    <ClCompile Include="Permutator.c" />
-    <ClCompile Include="Rational.c" />
-    <ClCompile Include="StrConverter.c" />
-    <ClCompile Include="TicketsSolver.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Evaluator.h" />
-    <ClInclude Include="Permutator.h" />
-    <ClInclude Include="Rational.h" />
-    <ClInclude Include="StrConverter.h" />
-    <ClInclude Include="Ticket.h" />
-    <ClInclude Include="TicketsSolver.h" />
-    <ClInclude Include="TIME_MEASURE.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

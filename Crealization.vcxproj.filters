@@ -15,45 +15,45 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Main.c">
+    <ClCompile Include="Crealization\Evaluator.c">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="Rational.c">
+    <ClCompile Include="Crealization\Main.c">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="Permutator.c">
+    <ClCompile Include="Crealization\Permutator.c">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="Evaluator.c">
+    <ClCompile Include="Crealization\Rational.c">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="StrConverter.c">
+    <ClCompile Include="Crealization\StrConverter.c">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="TicketsSolver.c">
+    <ClCompile Include="Crealization\TicketsSolver.c">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Rational.h">
+    <ClInclude Include="Crealization\TIME_MEASURE.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="Ticket.h">
+    <ClInclude Include="Crealization\TicketsSolver.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="Permutator.h">
+    <ClInclude Include="Crealization\Ticket.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="TIME_MEASURE.h">
+    <ClInclude Include="Crealization\StrConverter.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="Evaluator.h">
+    <ClInclude Include="Crealization\Rational.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="StrConverter.h">
+    <ClInclude Include="Crealization\Permutator.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="TicketsSolver.h">
+    <ClInclude Include="Crealization\Evaluator.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
