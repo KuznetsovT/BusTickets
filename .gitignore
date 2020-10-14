@@ -4,17 +4,14 @@
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
 
-Debug
-gcc
-Release
-*.sln
-*.vcxproj.*
-*.vcxproj
-
 #VISUAL STUDIO
 *.sln
 *.vcxproj.*
 *.vcxproj
+
+/Debug
+/gcc
+
 
 
 # User-specific files
