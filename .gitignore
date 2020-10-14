@@ -7,9 +7,9 @@
 Debug
 gcc
 Release
-.sln
+*.sln
 *.vsxproj.*
-
+*.vsxproj
 
 
 # User-specific files
