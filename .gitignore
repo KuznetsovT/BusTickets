@@ -10,8 +10,11 @@
 *.vcxproj
 
 /Debug
-/gcc
-
+/gcc/*
+*.exe
+Crealization.sln
+Crealization.vcxproj
+Crealization.vcxproj.filters
 
 
 # User-specific files
