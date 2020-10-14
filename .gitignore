@@ -5,11 +5,16 @@
 
 
 Debug
-gcc
+gcc/*
 Release
 *.sln
-*.vsxproj.*
-*.vsxproj
+*.vcxproj.*
+*.vcxproj
+
+#VISUAL STUDIO
+*.sln
+*.vcxproj.*
+*.vcxproj
 
 
 # User-specific files
