@@ -5,7 +5,7 @@
 
 
 Debug
-gcc/*
+gcc
 Release
 *.sln
 *.vcxproj.*
