@@ -5,31 +5,31 @@
 static const OPERATORS
 	PLUS = 0u,    //id: 0
 	MINUS = 1u,
-	MINUS_PLUS = 2u,  //конструкция вида: -(a) + b обозначаем ~
+	MINUS_PLUS = 2u,  //РєРѕРЅСЃС‚СЂСѓРєС†РёСЏ РІРёРґР°: -(a) + b РѕР±РѕР·РЅР°С‡Р°РµРј ~
 	MULTIPLE = 3u,
 	DIVIDE = 4u; //id: 4
 
 
-//!!!!!Вычисления!!!!!!!
+//!!!!!Р’С‹С‡РёСЃР»РµРЅРёСЏ!!!!!!!
 
-	//далее идут методы для вычисления выражения и представления его в строковом виде
+	//РґР°Р»РµРµ РёРґСѓС‚ РјРµС‚РѕРґС‹ РґР»СЏ РІС‹С‡РёСЃР»РµРЅРёСЏ РІС‹СЂР°Р¶РµРЅРёСЏ Рё РїСЂРµРґСЃС‚Р°РІР»РµРЅРёСЏ РµРіРѕ РІ СЃС‚СЂРѕРєРѕРІРѕРј РІРёРґРµ
 
-//производим сдвиг eval_list
+//РїСЂРѕРёР·РІРѕРґРёРј СЃРґРІРёРі eval_list
 static void move(Rational* a, Rational* const _begin);
-//копирует из data в list
+//РєРѕРїРёСЂСѓРµС‚ РёР· data РІ list
 static void reinit_eval_list(struct Evaluator eval);
 
 //............................................................................
 
-//Вычисления будем проводить в функциональном стиле.
+//Р’С‹С‡РёСЃР»РµРЅРёСЏ Р±СѓРґРµРј РїСЂРѕРІРѕРґРёС‚СЊ РІ С„СѓРЅРєС†РёРѕРЅР°Р»СЊРЅРѕРј СЃС‚РёР»Рµ.
 
-//операторы рациональных чисел
+//РѕРїРµСЂР°С‚РѕСЂС‹ СЂР°С†РёРѕРЅР°Р»СЊРЅС‹С… С‡РёСЃРµР»
 typedef struct Rational(*binary_operator_Rational)(struct Rational, struct Rational);
 
-//безопасный оператор проверяющий деление на ноль и определённые оптимизации
+//Р±РµР·РѕРїР°СЃРЅС‹Р№ РѕРїРµСЂР°С‚РѕСЂ РїСЂРѕРІРµСЂСЏСЋС‰РёР№ РґРµР»РµРЅРёРµ РЅР° РЅРѕР»СЊ Рё РѕРїСЂРµРґРµР»С‘РЅРЅС‹Рµ РѕРїС‚РёРјРёР·Р°С†РёРё
 typedef struct Rational(*safe_binary_operator_Rational)(struct Rational, struct Rational, bool*);
 
-//библиотека операторов в случае, когда мы честно считаем значение выражения
+//Р±РёР±Р»РёРѕС‚РµРєР° РѕРїРµСЂР°С‚РѕСЂРѕРІ РІ СЃР»СѓС‡Р°Рµ, РєРѕРіРґР° РјС‹ С‡РµСЃС‚РЅРѕ СЃС‡РёС‚Р°РµРј Р·РЅР°С‡РµРЅРёРµ РІС‹СЂР°Р¶РµРЅРёСЏ
 const static binary_operator_Rational honestly_lib[] = {
 	Rational_plus,
 	Rational_minus,
@@ -38,7 +38,7 @@ const static binary_operator_Rational honestly_lib[] = {
 	Rational_divide
 };
 
-//ОБЪЯВЛЯЕМ ОПЕРАТОРЫ ДЛЯ БЫСТРОГО И ОПТИМИЗИРОВАННОГО ВЫЧИСЛЕНИЯ
+//РћР‘РЄРЇР’Р›РЇР•Рњ РћРџР•Р РђРўРћР Р« Р”Р›РЇ Р‘Р«РЎРўР РћР“Рћ Р РћРџРўРРњРР—РР РћР’РђРќРќРћР“Рћ Р’Р«Р§РРЎР›Р•РќРРЇ
 
 
 static Rational safe_Rational_plus(Rational, Rational, bool*);
@@ -47,7 +47,7 @@ static Rational safe_Rational_minus_plus(Rational, Rational, bool*);
 static Rational safe_Rational_multiple(Rational, Rational, bool*);
 static Rational safe_Rational_divide(Rational, Rational, bool*);
 
-//Библиотека функций для оптимизированных вычислений
+//Р‘РёР±Р»РёРѕС‚РµРєР° С„СѓРЅРєС†РёР№ РґР»СЏ РѕРїС‚РёРјРёР·РёСЂРѕРІР°РЅРЅС‹С… РІС‹С‡РёСЃР»РµРЅРёР№
 const static safe_binary_operator_Rational rational_lib[] = {
 	safe_Rational_plus,
 	safe_Rational_minus,
@@ -58,52 +58,52 @@ const static safe_binary_operator_Rational rational_lib[] = {
 
 ////////////////////////////////////////////////////////////////////////
 
-//выделяем память для вычислительной доски
+//РІС‹РґРµР»СЏРµРј РїР°РјСЏС‚СЊ РґР»СЏ РІС‹С‡РёСЃР»РёС‚РµР»СЊРЅРѕР№ РґРѕСЃРєРё
 void* init_Evaluator(struct Evaluator* eval, unsigned size, const Rational* _data, struct OpersConfig _opers_config)
 {
 	*eval = (struct Evaluator){ malloc(size * sizeof(Rational)), size, _data, _opers_config };
 	return eval->list;
 }
 
-//освобождаем память выделенную для доски
+//РѕСЃРІРѕР±РѕР¶РґР°РµРј РїР°РјСЏС‚СЊ РІС‹РґРµР»РµРЅРЅСѓСЋ РґР»СЏ РґРѕСЃРєРё
 void destroy_Evaluator(Rational* list)
 {
 	free(list);
 }
 
-//функция производит нужные вычисления если происходит деление на 0 возвращает INF
-	//если промежуточный результат отрицательный - возвращает -1
+//С„СѓРЅРєС†РёСЏ РїСЂРѕРёР·РІРѕРґРёС‚ РЅСѓР¶РЅС‹Рµ РІС‹С‡РёСЃР»РµРЅРёСЏ РµСЃР»Рё РїСЂРѕРёСЃС…РѕРґРёС‚ РґРµР»РµРЅРёРµ РЅР° 0 РІРѕР·РІСЂР°С‰Р°РµС‚ INF
+	//РµСЃР»Рё РїСЂРѕРјРµР¶СѓС‚РѕС‡РЅС‹Р№ СЂРµР·СѓР»СЊС‚Р°С‚ РѕС‚СЂРёС†Р°С‚РµР»СЊРЅС‹Р№ - РІРѕР·РІСЂР°С‰Р°РµС‚ -1
 Rational Evaluator_evaluate(struct Evaluator eval)
 {
 	reinit_eval_list(eval);
 	struct token* i = eval.opers_config.opers;
 	struct token* const _end = eval.opers_config.opers + eval.opers_config.opers_size;
 
-	Rational* _begin = eval.list; //по ходу вчисления начало массива немного сдвигается
+	Rational* _begin = eval.list; //РїРѕ С…РѕРґСѓ РІС‡РёСЃР»РµРЅРёСЏ РЅР°С‡Р°Р»Рѕ РјР°СЃСЃРёРІР° РЅРµРјРЅРѕРіРѕ СЃРґРІРёРіР°РµС‚СЃСЏ
 	for (; i != _end; ++i, ++_begin) {
 		Rational* b_iter = eval.list + i->pos;
 		Rational* a_iter = b_iter - 1;
 		bool flag = true;
 		*b_iter = rational_lib[i->sign](*a_iter, *b_iter, &flag);
-		//если деление на ноль, или
-		//если пром. результат отрицательный, значит 
-		//один из знаков суммы можно поменять на другой знак суммы  - получится положительный результат
+		//РµСЃР»Рё РґРµР»РµРЅРёРµ РЅР° РЅРѕР»СЊ, РёР»Рё
+		//РµСЃР»Рё РїСЂРѕРј. СЂРµР·СѓР»СЊС‚Р°С‚ РѕС‚СЂРёС†Р°С‚РµР»СЊРЅС‹Р№, Р·РЅР°С‡РёС‚ 
+		//РѕРґРёРЅ РёР· Р·РЅР°РєРѕРІ СЃСѓРјРјС‹ РјРѕР¶РЅРѕ РїРѕРјРµРЅСЏС‚СЊ РЅР° РґСЂСѓРіРѕР№ Р·РЅР°Рє СЃСѓРјРјС‹  - РїРѕР»СѓС‡РёС‚СЃСЏ РїРѕР»РѕР¶РёС‚РµР»СЊРЅС‹Р№ СЂРµР·СѓР»СЊС‚Р°С‚
 		if (!flag) return *b_iter;
 		move(a_iter, _begin);
 	}
 
-	return eval.list[eval.opers_config.opers_size]; //возвращает последнее оставшееся значение
+	return eval.list[eval.opers_config.opers_size]; //РІРѕР·РІСЂР°С‰Р°РµС‚ РїРѕСЃР»РµРґРЅРµРµ РѕСЃС‚Р°РІС€РµРµСЃСЏ Р·РЅР°С‡РµРЅРёРµ
 }
 
 
-// честно до конца производит все вычисления
+// С‡РµСЃС‚РЅРѕ РґРѕ РєРѕРЅС†Р° РїСЂРѕРёР·РІРѕРґРёС‚ РІСЃРµ РІС‹С‡РёСЃР»РµРЅРёСЏ
 Rational Evaluator_evaluate_honestly(struct Evaluator eval)
 {
 	reinit_eval_list(eval);
 	struct token* i = eval.opers_config.opers;
 	struct token* const _end = eval.opers_config.opers + eval.opers_config.opers_size;
 
-	Rational* _begin = eval.list; //по ходу вчисления начало массива немного сдвигается
+	Rational* _begin = eval.list; //РїРѕ С…РѕРґСѓ РІС‡РёСЃР»РµРЅРёСЏ РЅР°С‡Р°Р»Рѕ РјР°СЃСЃРёРІР° РЅРµРјРЅРѕРіРѕ СЃРґРІРёРіР°РµС‚СЃСЏ
 	for (; i != _end; ++i, ++_begin) {
 		Rational* b_iter = eval.list + i->pos;
 		Rational* a_iter = b_iter - 1;
@@ -112,15 +112,15 @@ Rational Evaluator_evaluate_honestly(struct Evaluator eval)
 		move(a_iter, _begin);
 	}
 
-	return eval.list[eval.opers_config.opers_size]; //возвращает последнее оставшееся значение
+	return eval.list[eval.opers_config.opers_size]; //РІРѕР·РІСЂР°С‰Р°РµС‚ РїРѕСЃР»РµРґРЅРµРµ РѕСЃС‚Р°РІС€РµРµСЃСЏ Р·РЅР°С‡РµРЅРёРµ
 }
 
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-//Приватные методы + реализация операторов для безопасной библиотеки.
+//РџСЂРёРІР°С‚РЅС‹Рµ РјРµС‚РѕРґС‹ + СЂРµР°Р»РёР·Р°С†РёСЏ РѕРїРµСЂР°С‚РѕСЂРѕРІ РґР»СЏ Р±РµР·РѕРїР°СЃРЅРѕР№ Р±РёР±Р»РёРѕС‚РµРєРё.
 
-//производим сдвиг eval_list
+//РїСЂРѕРёР·РІРѕРґРёРј СЃРґРІРёРі eval_list
 static void move(Rational* a, Rational* const _begin)
 {
 	for (Rational* for_copy = a - 1; for_copy >= _begin; --a, --for_copy) {
@@ -129,7 +129,7 @@ static void move(Rational* a, Rational* const _begin)
 }
 
 
-//копирует из data в list
+//РєРѕРїРёСЂСѓРµС‚ РёР· data РІ list
 static void reinit_eval_list(struct Evaluator eval)
 {
 	Rational* i = eval.list;
@@ -147,20 +147,26 @@ static Rational safe_Rational_plus(Rational a, Rational b, bool* flag)
 
 static Rational safe_Rational_minus(Rational a, Rational b, bool* flag)
 {
-	if (Rational_less(a, b)) {             //промежуточные значения не должны быть отрицательными см. evaluate
+	//РїСЂРѕРјРµР¶СѓС‚РѕС‡РЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ РЅРµ РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ РѕС‚СЂРёС†Р°С‚РµР»СЊРЅС‹РјРё СЃРј. evaluate
+	//С…РѕС‚СЊ РґР°РЅРЅРѕРµ РїСЂР°РІРёР»Рѕ Рё РёРјРµРµС‚ РѕРїСЂРµРґРµР»РµРЅРЅС‹Рµ РѕРіСЂР°РЅРёС‡РµРЅРёСЏ, РІ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРё РѕРїРµСЂР°С‚РѕСЂР° -+ РµСЃС‚СЊ Р»РѕРіРёРєР° С‚РѕР»СЊРєРѕ РµСЃР»Рё РѕРЅ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РґР»СЏ 
+	if (Rational_less(a, b)) {
 		*flag = false;
-		return (Rational){ -1, 1 };
+		return (Rational) { -1, 1 };
 	}
-	else return Rational_minus(a, b);
+	else
+	return Rational_minus(a, b);
 }
 
 static Rational safe_Rational_minus_plus(Rational a, Rational b, bool* flag)
 {
-	if (!(Rational_less(a, b))) {        //промежуточные значения не должны быть отрицательными см. evaluate
+	//РїСЂРѕРјРµР¶СѓС‚РѕС‡РЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ РЅРµ РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ РѕС‚СЂРёС†Р°С‚РµР»СЊРЅС‹РјРё СЃРј. evaluate
+	//С…РѕС‚СЊ РґР°РЅРЅРѕРµ РїСЂР°РІРёР»Рѕ Рё РёРјРµРµС‚ РѕРїСЂРµРґРµР»РµРЅРЅС‹Рµ РѕРіСЂР°РЅРёС‡РµРЅРёСЏ, РІ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРё РѕРїРµСЂР°С‚РѕСЂР° -+ РµСЃС‚СЊ Р»РѕРіРёРєР° С‚РѕР»СЊРєРѕ РµСЃР»Рё РѕРЅ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РґР»СЏ 
+	if (!Rational_less(a, b)) {
 		*flag = false;
 		return (Rational) { -1, 1 };
 	}
-	else return Rational_minus_plus(a, b);
+	else
+	return Rational_minus_plus(a, b);
 }
 
 
@@ -171,9 +177,9 @@ static Rational safe_Rational_multiple(Rational a, Rational b, bool* flag)
 
 static Rational safe_Rational_divide(Rational a, Rational b, bool* flag)
 {
-	if (b.numer == 0) {                 //проверяем деление на ноль, дополнительно по флагам см. evaluate
+	if (b.numer == 0) {                 //РїСЂРѕРІРµСЂСЏРµРј РґРµР»РµРЅРёРµ РЅР° РЅРѕР»СЊ, РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅРѕ РїРѕ С„Р»Р°РіР°Рј СЃРј. evaluate
 		*flag = false;
 		return INF;
 	}
-	else return Rational_unsigned_divide(a, b); //мы работаем с положительными дробями ради оптимизации
+	else return Rational_unsigned_divide(a, b); //РјС‹ СЂР°Р±РѕС‚Р°РµРј СЃ РїРѕР»РѕР¶РёС‚РµР»СЊРЅС‹РјРё РґСЂРѕР±СЏРјРё СЂР°РґРё РѕРїС‚РёРјРёР·Р°С†РёРё
 }

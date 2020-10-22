@@ -1,11 +1,11 @@
 #include "Rational.h"
 #include <math.h>
 
-//нахождение НОК
+//РЅР°С…РѕР¶РґРµРЅРёРµ РќРћРљ
 unsigned gcd(int a, int b);
 
 
-//инициализируем дробь
+//РёРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј РґСЂРѕР±СЊ
 Rational init_Rational(int numer, unsigned denumer)
 {
 	return (struct Rational) { numer, denumer };	
@@ -17,19 +17,19 @@ Rational init_Rational_by_int(int number)
 	return (struct Rational) { number, 1u };
 }
 
-//создаёт несократимую дробь
+//СЃРѕР·РґР°С‘С‚ РЅРµСЃРѕРєСЂР°С‚РёРјСѓСЋ РґСЂРѕР±СЊ
 Rational Make_Rational(int _numer, unsigned _denumer) {
 	unsigned _gcd = gcd(_numer, _denumer);
 	return (struct Rational){ _numer / (int)_gcd, _denumer / _gcd };
 }
 
-//сокращаем дробь
+//СЃРѕРєСЂР°С‰Р°РµРј РґСЂРѕР±СЊ
 void Rational_normalize(struct Rational* r) {
 	unsigned _gcd = gcd(r->numer, r->denumer);
 	r->numer /= (int)_gcd; r->denumer /= _gcd;
 }
 
-//переворот дроби
+//РїРµСЂРµРІРѕСЂРѕС‚ РґСЂРѕР±Рё
 void Rational_reverse(struct Rational* r) {
 	*r = Rational_reversed(*r);
 }
@@ -103,7 +103,7 @@ bool Rational_less(struct Rational a, struct Rational b) {
 
 ///////////////////////////////////////////////////////////////
 
-//нахождение НОК
+//РЅР°С…РѕР¶РґРµРЅРёРµ РќРћРљ
 unsigned gcd(int a, int b)
 {
 	if (!a && !b) return 1u;

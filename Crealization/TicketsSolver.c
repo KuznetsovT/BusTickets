@@ -69,10 +69,10 @@ void destroy_TicketsSolver(TicketsSolver* ts)
 	free(ts->ticket.str_data);
 	destroy_Evaluator(ts->evaluator.list);
 	
-	ts->ticket.data = ts->evaluator.data = NULL;
-	ts->ticket.str_data = ts->str_converter.str_data = NULL;
+	ts->ticket.data = ts->evaluator.data = 0;
+	ts->ticket.str_data = ts->str_converter.str_data = 0;
 	ts->ticket.size = ts->permutator.opers_config.opers_size = ts->evaluator.list_size = ts->opers_config.opers_size = ts->str_converter.list_size = 0;
-	ts->opers_config.opers = ts->evaluator.opers_config.opers = ts->permutator.opers_config.opers = ts->permutator.opers_config.opers = ts->str_converter.opers_config.opers = NULL;
+	ts->opers_config.opers = ts->evaluator.opers_config.opers = ts->permutator.opers_config.opers = ts->permutator.opers_config.opers = ts->str_converter.opers_config.opers = 0;
 }
 
 

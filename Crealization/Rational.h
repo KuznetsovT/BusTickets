@@ -3,7 +3,7 @@
 #include <stdbool.h>
 
 
-//структура рациональных чисел
+//СЃС‚СЂСѓРєС‚СѓСЂР° СЂР°С†РёРѕРЅР°Р»СЊРЅС‹С… С‡РёСЃРµР»
 
 typedef struct Rational {
 	int numer;
@@ -14,20 +14,20 @@ const static Rational INF = { 1, 0u };
 const static Rational NaN = { 0, 0u };
 const static Rational NILL = { 0, 1 };
 
-//инициализирует переменные и возвращает Rational
+//РёРЅРёС†РёР°Р»РёР·РёСЂСѓРµС‚ РїРµСЂРµРјРµРЅРЅС‹Рµ Рё РІРѕР·РІСЂР°С‰Р°РµС‚ Rational
 Rational init_Rational(int numer, unsigned denumer);
-//для целого числа
+//РґР»СЏ С†РµР»РѕРіРѕ С‡РёСЃР»Р°
 Rational init_Rational_by_int(int number);
 
-//создаёт несократимую дробь
+//СЃРѕР·РґР°С‘С‚ РЅРµСЃРѕРєСЂР°С‚РёРјСѓСЋ РґСЂРѕР±СЊ
 Rational Make_Rational(int numer, unsigned denumer);
 
-//сокращаем дробь
+//СЃРѕРєСЂР°С‰Р°РµРј РґСЂРѕР±СЊ
 void Rational_normalize(Rational* r);
 void Rational_reverse(Rational* r);
 
 ///////////////////////////////////////////////////////////////////
-//ОПЕРАТОРЫ//
+//РћРџР•Р РђРўРћР Р«//
 
 Rational Rational_unary_minus(Rational r);
 Rational Rational_reversed(Rational r);

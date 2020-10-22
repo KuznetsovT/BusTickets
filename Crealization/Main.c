@@ -38,16 +38,17 @@ int main() {
 			return 3;
 		}
 	}
-
+	putchar('\n');
 	TicketsSolver ts;
 	if (init_TicketsSolver(&ts, length, goal, uns_data)) {
 		printf("TicketsSolver initialization error. Terminate\n");
 		return 4;
 	}
+	//ts.permutator._WORKING_OPERATORS = ONLY_SUM;
 	unsigned count = 0;
 	TIME_MEASURE_BEGIN(measure)
 		count = all_solutions(ts, stdout);
 	TIME_MEASURE_END(measure)
-		printf("COUNT OF SOLUTIONS : %u    TIME : %.1lf ms\n", count, measure);
+		printf("\nCOUNT OF SOLUTIONS : %u    TIME : %.1lf ms\n", count, measure);
 	return 0;
 }

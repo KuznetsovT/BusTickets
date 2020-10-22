@@ -15,7 +15,7 @@ double identifier = 0;                                                          
 
 #define TIME_MEASURE_END(identifier)                                                   \
         }                                                                              \
-    double   __end__ = (double) clock(); /*процессорное время*/                        \
+    double   __end__ = (double) clock();                                               \
     identifier = _ms_( ( __end__ - __begin__ ) );                                      \
 }                                                                                      \
 

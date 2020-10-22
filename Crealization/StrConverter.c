@@ -8,37 +8,37 @@
 
 
 /*
-Технология конвертации выражения в строку аналогична его вычислению.
-Находится первый оператор, наодятся два операнда, производится вычисление третьей строки по правилам НОТАЦИИ.
-Будем использовать две нотации, NORMAL_NOTATION и REVERSED_NOTATION
+РўРµС…РЅРѕР»РѕРіРёСЏ РєРѕРЅРІРµСЂС‚Р°С†РёРё РІС‹СЂР°Р¶РµРЅРёСЏ РІ СЃС‚СЂРѕРєСѓ Р°РЅР°Р»РѕРіРёС‡РЅР° РµРіРѕ РІС‹С‡РёСЃР»РµРЅРёСЋ.
+РќР°С…РѕРґРёС‚СЃСЏ РїРµСЂРІС‹Р№ РѕРїРµСЂР°С‚РѕСЂ, РЅР°РѕРґСЏС‚СЃСЏ РґРІР° РѕРїРµСЂР°РЅРґР°, РїСЂРѕРёР·РІРѕРґРёС‚СЃСЏ РІС‹С‡РёСЃР»РµРЅРёРµ С‚СЂРµС‚СЊРµР№ СЃС‚СЂРѕРєРё РїРѕ РїСЂР°РІРёР»Р°Рј РќРћРўРђР¦РР.
+Р‘СѓРґРµРј РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РґРІРµ РЅРѕС‚Р°С†РёРё, NORMAL_NOTATION Рё REVERSED_NOTATION
 */
 
 static const OPERATORS
 	PLUS = 0u,    //id: 0
 	MINUS = 1u,
-	MINUS_PLUS = 2u,  //конструкция вида: -(a) + b обозначаем ~
+	MINUS_PLUS = 2u,  //РєРѕРЅСЃС‚СЂСѓРєС†РёСЏ РІРёРґР°: -(a) + b РѕР±РѕР·РЅР°С‡Р°РµРј ~
 	MULTIPLE = 3u,
 	DIVIDE = 4u; //id: 4
 
-/*определим количество символов, которое тратится на каждое число.
-* Считая, что у нас длина строки пропорциональна количеству битов(в случае когда вывод в 2разрядной системе)
-* На скобки и запись знака тратим максимум 16 знаков.
+/*РѕРїСЂРµРґРµР»РёРј РєРѕР»РёС‡РµСЃС‚РІРѕ СЃРёРјРІРѕР»РѕРІ, РєРѕС‚РѕСЂРѕРµ С‚СЂР°С‚РёС‚СЃСЏ РЅР° РєР°Р¶РґРѕРµ С‡РёСЃР»Рѕ.
+* РЎС‡РёС‚Р°СЏ, С‡С‚Рѕ Сѓ РЅР°СЃ РґР»РёРЅР° СЃС‚СЂРѕРєРё РїСЂРѕРїРѕСЂС†РёРѕРЅР°Р»СЊРЅР° РєРѕР»РёС‡РµСЃС‚РІСѓ Р±РёС‚РѕРІ(РІ СЃР»СѓС‡Р°Рµ РєРѕРіРґР° РІС‹РІРѕРґ РІ 2СЂР°Р·СЂСЏРґРЅРѕР№ СЃРёСЃС‚РµРјРµ)
+* РќР° СЃРєРѕР±РєРё Рё Р·Р°РїРёСЃСЊ Р·РЅР°РєР° С‚СЂР°С‚РёРј РјР°РєСЃРёРјСѓРј 16 Р·РЅР°РєРѕРІ.
 * */
 const static unsigned LETTERS_PER_NUMBER = 16 + sizeof(unsigned) * (CHAR_BIT + 2)/3;
 
 
-//определяем какие id мы даём строковым выражениям
+//РѕРїСЂРµРґРµР»СЏРµРј РєР°РєРёРµ id РјС‹ РґР°С‘Рј СЃС‚СЂРѕРєРѕРІС‹Рј РІС‹СЂР°Р¶РµРЅРёСЏРј
 static const str_id
-	NUM = 0u,    //число
-	SUM = 1u,    //многочлен, сумма нескольких выражений
-	MULT = 2u,   //произведение, последний знак - умножение
-	DIV = 3u,    //частное, последний знак - деление
-	EXPR = 4u;   //сложное выражение (используется в REVERSED_NOTATION)
+	NUM = 0u,    //С‡РёСЃР»Рѕ
+	SUM = 1u,    //РјРЅРѕРіРѕС‡Р»РµРЅ, СЃСѓРјРјР° РЅРµСЃРєРѕР»СЊРєРёС… РІС‹СЂР°Р¶РµРЅРёР№
+	MULT = 2u,   //РїСЂРѕРёР·РІРµРґРµРЅРёРµ, РїРѕСЃР»РµРґРЅРёР№ Р·РЅР°Рє - СѓРјРЅРѕР¶РµРЅРёРµ
+	DIV = 3u,    //С‡Р°СЃС‚РЅРѕРµ, РїРѕСЃР»РµРґРЅРёР№ Р·РЅР°Рє - РґРµР»РµРЅРёРµ
+	EXPR = 4u;   //СЃР»РѕР¶РЅРѕРµ РІС‹СЂР°Р¶РµРЅРёРµ (РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РІ REVERSED_NOTATION)
 
 //????????????????????????????????????????????????????????????????
 //????????????????????????????????????????????????????????????????
 
-//Обьявления и определения Библиотек Нотаций.
+//РћР±СЊСЏРІР»РµРЅРёСЏ Рё РѕРїСЂРµРґРµР»РµРЅРёСЏ Р‘РёР±Р»РёРѕС‚РµРє РќРѕС‚Р°С†РёР№.
 typedef struct str_token(*binary_operator_StrConverter)(struct str_token a, struct str_token b, unsigned str_size);
 
 
@@ -58,7 +58,7 @@ const binary_operator_StrConverter NORMAL_NOTATION[OPERATORS_COUNT] = {
 };
 
 
-//Для обратной нотации с операторами проще,
+//Р”Р»СЏ РѕР±СЂР°С‚РЅРѕР№ РЅРѕС‚Р°С†РёРё СЃ РѕРїРµСЂР°С‚РѕСЂР°РјРё РїСЂРѕС‰Рµ,
 
 const char REVERSED_NOTATION_OPERATORS[OPERATORS_COUNT] = {
 	'+', //OPERATORS(0)
@@ -68,7 +68,7 @@ const char REVERSED_NOTATION_OPERATORS[OPERATORS_COUNT] = {
 	'/', //OPERATORS(4)
 };
 
-//дополнительные макросы для удобочитаемости dest - указатель на область в памяти возвращаемого обьекта
+//РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РјР°РєСЂРѕСЃС‹ РґР»СЏ СѓРґРѕР±РѕС‡РёС‚Р°РµРјРѕСЃС‚Рё dest - СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РѕР±Р»Р°СЃС‚СЊ РІ РїР°РјСЏС‚Рё РІРѕР·РІСЂР°С‰Р°РµРјРѕРіРѕ РѕР±СЊРµРєС‚Р°
 #define add(string) for (const char* source = string; *source != 0; ++source, ++dest) *dest = *source;
 #define addC( Char ) *(dest++) = Char;
 
@@ -76,26 +76,26 @@ const char REVERSED_NOTATION_OPERATORS[OPERATORS_COUNT] = {
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
 
-//первичное заполнение листа строками Копирует строки из str_data
+//РїРµСЂРІРёС‡РЅРѕРµ Р·Р°РїРѕР»РЅРµРЅРёРµ Р»РёСЃС‚Р° СЃС‚СЂРѕРєР°РјРё РљРѕРїРёСЂСѓРµС‚ СЃС‚СЂРѕРєРё РёР· str_data
 static int _StrConverter_init_Str_List(struct StrConverter sconv);
 
-//производим сдвиг данных в памяти str_list
+//РїСЂРѕРёР·РІРѕРґРёРј СЃРґРІРёРі РґР°РЅРЅС‹С… РІ РїР°РјСЏС‚Рё str_list
 static void _StrConverter_move(struct str_token* a, struct str_token* const _begin);
 
-//освобождаем выделенную память из str_list на промежутке [begin, end)
+//РѕСЃРІРѕР±РѕР¶РґР°РµРј РІС‹РґРµР»РµРЅРЅСѓСЋ РїР°РјСЏС‚СЊ РёР· str_list РЅР° РїСЂРѕРјРµР¶СѓС‚РєРµ [begin, end)
 static void _StrConverter_destroy_str_list(struct str_token* begin, struct str_token* const end);
 
 ///////////////////////////////////////////////////////////////////
 
 
-//выделяет достаточно памяти для строкового представления выражения из size чисел
+//РІС‹РґРµР»СЏРµС‚ РґРѕСЃС‚Р°С‚РѕС‡РЅРѕ РїР°РјСЏС‚Рё РґР»СЏ СЃС‚СЂРѕРєРѕРІРѕРіРѕ РїСЂРµРґСЃС‚Р°РІР»РµРЅРёСЏ РІС‹СЂР°Р¶РµРЅРёСЏ РёР· size С‡РёСЃРµР»
 char* static_Str_Converter_Allocate_enough(unsigned size)
 {
 
 	return malloc(size * LETTERS_PER_NUMBER * sizeof(char));
 }
 
-//Для обратной нотации конвертация происходит за один проход
+//Р”Р»СЏ РѕР±СЂР°С‚РЅРѕР№ РЅРѕС‚Р°С†РёРё РєРѕРЅРІРµСЂС‚Р°С†РёСЏ РїСЂРѕРёСЃС…РѕРґРёС‚ Р·Р° РѕРґРёРЅ РїСЂРѕС…РѕРґ
 
 char* StrConverter_reversed_convert(struct StrConverter conv) {
 	
@@ -105,11 +105,11 @@ char* StrConverter_reversed_convert(struct StrConverter conv) {
 	struct token* oper = conv.opers_config.opers;
 	const struct str_token* data = conv.str_data, * const end = conv.str_data + conv.list_size;
 	unsigned num = 0;
-	//проходим по всем числам
+	//РїСЂРѕС…РѕРґРёРј РїРѕ РІСЃРµРј С‡РёСЃР»Р°Рј
 	for (; data != end; ++data, ++num) {
-		//копируем число
+		//РєРѕРїРёСЂСѓРµРј С‡РёСЃР»Рѕ
 		add(data->str) addC(' ')
-		//копируем все идущие после числа операторы
+		//РєРѕРїРёСЂСѓРµРј РІСЃРµ РёРґСѓС‰РёРµ РїРѕСЃР»Рµ С‡РёСЃР»Р° РѕРїРµСЂР°С‚РѕСЂС‹
 		for (; oper->pos == num; oper++) {
 			addC(REVERSED_NOTATION_OPERATORS[oper->sign]) addC(' ')
 		}
@@ -120,40 +120,40 @@ char* StrConverter_reversed_convert(struct StrConverter conv) {
 
 
 
-//возвращает динамически выделенную строку.
+//РІРѕР·РІСЂР°С‰Р°РµС‚ РґРёРЅР°РјРёС‡РµСЃРєРё РІС‹РґРµР»РµРЅРЅСѓСЋ СЃС‚СЂРѕРєСѓ.
 char* StrConverter_normal_convert(struct StrConverter conv)
 {
-	if (!_StrConverter_init_Str_List(conv)) { return NULL; }//пытаемся проинициализировать str_list
+	if (!_StrConverter_init_Str_List(conv)) { return NULL; }//РїС‹С‚Р°РµРјСЃСЏ РїСЂРѕРёРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°С‚СЊ str_list
 
-	const unsigned STR_SIZE = conv.list_size * LETTERS_PER_NUMBER; //количество символов в строках
+	const unsigned STR_SIZE = conv.list_size * LETTERS_PER_NUMBER; //РєРѕР»РёС‡РµСЃС‚РІРѕ СЃРёРјРІРѕР»РѕРІ РІ СЃС‚СЂРѕРєР°С…
 
 	struct token* i = conv.opers_config.opers;
 	struct token* const _end = conv.opers_config.opers + conv.opers_config.opers_size;
 
-	struct str_token* _begin = conv.list; //по ходу вычислений начало массива немного сдвигается
+	struct str_token* _begin = conv.list; //РїРѕ С…РѕРґСѓ РІС‹С‡РёСЃР»РµРЅРёР№ РЅР°С‡Р°Р»Рѕ РјР°СЃСЃРёРІР° РЅРµРјРЅРѕРіРѕ СЃРґРІРёРіР°РµС‚СЃСЏ
 	for (; i != _end; ++i, ++_begin) {
 		struct str_token* const b_iter = conv.list + i->pos;
 		struct str_token* const a_iter = b_iter - 1;
-		//ПРОИЗВОДИМ ВЫЧИСЛЕНИЯ В СООТВЕТСТВИИ С НОТАЦИЕЙ
+		//РџР РћРР—Р’РћР”РРњ Р’Р«Р§РРЎР›Р•РќРРЇ Р’ РЎРћРћРўР’Р•РўРЎРўР’РР РЎ РќРћРўРђР¦РР•Р™
 		struct str_token return_val = NORMAL_NOTATION[i->sign](*a_iter, *b_iter, STR_SIZE);
-		//ГРОМОЗДИМ НУЖНЫЕ НАМ ПРОВЕРКИ.
+		//Р“Р РћРњРћР—Р”РРњ РќРЈР–РќР«Р• РќРђРњ РџР РћР’Р•Р РљР.
 		if (!return_val.str) { // if success = > return_val != 0
 			_StrConverter_destroy_str_list(_begin, conv.list+conv.list_size);
 			return NULL;
 		}
-		free(b_iter->str); free(a_iter->str); //более ненужные строки удаляются по ходу выполнения
+		free(b_iter->str); free(a_iter->str); //Р±РѕР»РµРµ РЅРµРЅСѓР¶РЅС‹Рµ СЃС‚СЂРѕРєРё СѓРґР°Р»СЏСЋС‚СЃСЏ РїРѕ С…РѕРґСѓ РІС‹РїРѕР»РЅРµРЅРёСЏ
 		*b_iter = return_val;
 		_StrConverter_move(a_iter, _begin);
 	}
 
-	return conv.list[conv.opers_config.opers_size].str; //возвращает последнее оставшееся значение
+	return conv.list[conv.opers_config.opers_size].str; //РІРѕР·РІСЂР°С‰Р°РµС‚ РїРѕСЃР»РµРґРЅРµРµ РѕСЃС‚Р°РІС€РµРµСЃСЏ Р·РЅР°С‡РµРЅРёРµ
 }
 
 
 
 ///////////////////////////////////////////////////////////////////
 
-//создаёт массив со строковым представлением билетика МАССИВ ДИНАМИЧЕСКИЙ - СЛЕДУЕТ ОСВОБОДИТЬ
+//СЃРѕР·РґР°С‘С‚ РјР°СЃСЃРёРІ СЃРѕ СЃС‚СЂРѕРєРѕРІС‹Рј РїСЂРµРґСЃС‚Р°РІР»РµРЅРёРµРј Р±РёР»РµС‚РёРєР° РњРђРЎРЎРР’ Р”РРќРђРњРР§Р•РЎРљРР™ - РЎР›Р•Р”РЈР•Рў РћРЎР’РћР‘РћР”РРўР¬
 struct str_token* static_StrConverter_init_str_data(const unsigned* data, unsigned size)
 {
 	struct str_token* list = malloc(size * sizeof(struct str_token));
@@ -175,7 +175,7 @@ struct str_token* static_StrConverter_init_str_data(const unsigned* data, unsign
 }
 
 
-//конструктор
+//РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ
 void* init_Str_Converter(struct StrConverter* sconv, unsigned size, const struct str_token* str_data, struct OpersConfig _opers_config)
 {
 	*sconv = (struct StrConverter){ malloc(size * sizeof(struct str_token)), size, str_data, _opers_config };
@@ -183,7 +183,7 @@ void* init_Str_Converter(struct StrConverter* sconv, unsigned size, const struct
 }
 
 
-//деструктор, удаляющий динамически выделенный list
+//РґРµСЃС‚СЂСѓРєС‚РѕСЂ, СѓРґР°Р»СЏСЋС‰РёР№ РґРёРЅР°РјРёС‡РµСЃРєРё РІС‹РґРµР»РµРЅРЅС‹Р№ list
 void destroy_StrConverter(struct str_token* str_list) {
 	free(str_list);
 }
@@ -192,7 +192,7 @@ void destroy_StrConverter(struct str_token* str_list) {
 ///////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
-//первичное заполнение листа строками Копирует строки из str_data
+//РїРµСЂРІРёС‡РЅРѕРµ Р·Р°РїРѕР»РЅРµРЅРёРµ Р»РёСЃС‚Р° СЃС‚СЂРѕРєР°РјРё РљРѕРїРёСЂСѓРµС‚ СЃС‚СЂРѕРєРё РёР· str_data
 static int _StrConverter_init_Str_List(struct StrConverter conv)
 {
 	struct str_token* i = conv.list;
@@ -205,7 +205,7 @@ static int _StrConverter_init_Str_List(struct StrConverter conv)
 		i->str = malloc(STR_SIZE*sizeof(char));
 		if (!i->str)
 		{
-			//если выделения памяти не произошло, вызываем аварийное прекращение работы конвертера
+			//РµСЃР»Рё РІС‹РґРµР»РµРЅРёСЏ РїР°РјСЏС‚Рё РЅРµ РїСЂРѕРёР·РѕС€Р»Рѕ, РІС‹Р·С‹РІР°РµРј Р°РІР°СЂРёР№РЅРѕРµ РїСЂРµРєСЂР°С‰РµРЅРёРµ СЂР°Р±РѕС‚С‹ РєРѕРЅРІРµСЂС‚РµСЂР°
 			_StrConverter_destroy_str_list(conv.list, i);
 			return false;
 		}
@@ -216,14 +216,14 @@ static int _StrConverter_init_Str_List(struct StrConverter conv)
 }
 
 
-//освобождаем выделенную память из str_list на промежутке [begin, end)
+//РѕСЃРІРѕР±РѕР¶РґР°РµРј РІС‹РґРµР»РµРЅРЅСѓСЋ РїР°РјСЏС‚СЊ РёР· str_list РЅР° РїСЂРѕРјРµР¶СѓС‚РєРµ [begin, end)
 static void _StrConverter_destroy_str_list(struct str_token* a, struct str_token*const end)
 {
 	for (; a < end; ++a) free(a->str);
 }
 
 
-//производим сдвиг данных в памяти str_list
+//РїСЂРѕРёР·РІРѕРґРёРј СЃРґРІРёРі РґР°РЅРЅС‹С… РІ РїР°РјСЏС‚Рё str_list
 static void _StrConverter_move(struct str_token* a, struct str_token* const _begin)
 {
 	for (struct str_token* for_copy = a - 1; for_copy >= _begin; --a, --for_copy) {
@@ -238,16 +238,16 @@ static void _StrConverter_move(struct str_token* a, struct str_token* const _beg
 /**************************************************************************************/
 /*()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()*/
 
-//РЕАЛИЗАЦИЯ ОПЕРАТОРОВ КОНВЕРСИИ.
+//Р Р•РђР›РР—РђР¦РРЇ РћРџР•Р РђРўРћР РћР’ РљРћРќР’Р•Р РЎРР.
 
 
-#define ERROR_CODE (struct str_token){NULL}
+#define ERROR_CODE val
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
-//НОРМАЛЬНАЯ НОТАЦИЯ
+//РќРћР РњРђР›Р¬РќРђРЇ РќРћРўРђР¦РРЇ
 
-//сложение двух чисел
+//СЃР»РѕР¶РµРЅРёРµ РґРІСѓС… С‡РёСЃРµР»
 static struct str_token NORMAL_NOTATION_PLUS(struct str_token a, struct str_token b, unsigned str_size)
 {
 	struct str_token val = { malloc(str_size * LETTERS_PER_NUMBER * sizeof(char)), SUM };
@@ -259,7 +259,7 @@ static struct str_token NORMAL_NOTATION_PLUS(struct str_token a, struct str_toke
 	return val;
 }
 
-//вычитание
+//РІС‹С‡РёС‚Р°РЅРёРµ
 static struct str_token NORMAL_NOTATION_MINUS(struct str_token a, struct str_token b, unsigned str_size)
 {
 	struct str_token val = { malloc(str_size * LETTERS_PER_NUMBER * sizeof(char)), SUM };
@@ -278,7 +278,7 @@ static struct str_token NORMAL_NOTATION_MINUS(struct str_token a, struct str_tok
 	return val;
 }
 
-//минус-плюс
+//РјРёРЅСѓСЃ-РїР»СЋСЃ
 static struct str_token NORMAL_NOTATION_MINUS_PLUS(struct str_token a, struct str_token b, unsigned str_size)
 {
 	struct str_token val = { malloc(str_size * LETTERS_PER_NUMBER * sizeof(char)), SUM };
@@ -290,14 +290,14 @@ static struct str_token NORMAL_NOTATION_MINUS_PLUS(struct str_token a, struct st
 			*dest = 0;
 		}
 		else {
-			//val = "-("+ a + ")- " + b;
-			add("-(") add(a.str) add(")- ") add(b.str)
+			//val = "-("+ a + ")+ " + b;
+			add("-(") add(a.str) add(")+ ") add(b.str)
 			*dest = 0;
 		}
 	return val;
 }
 
-//умножение
+//СѓРјРЅРѕР¶РµРЅРёРµ
 static struct str_token NORMAL_NOTATION_MULTIPLE(struct str_token a, struct str_token b, unsigned str_size)
 {
 	struct str_token val = { malloc(str_size * LETTERS_PER_NUMBER * sizeof(char)), MULT };
@@ -326,7 +326,7 @@ static struct str_token NORMAL_NOTATION_MULTIPLE(struct str_token a, struct str_
 	return val;
 }
 
-//деление
+//РґРµР»РµРЅРёРµ
 static struct str_token NORMAL_NOTATION_DIVIDE(struct str_token a, struct str_token b, unsigned str_size)
 {
 	struct str_token val = { malloc(str_size * LETTERS_PER_NUMBER * sizeof(char)), DIV };
