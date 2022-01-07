@@ -139,7 +139,7 @@ bool TicketsSolver::next_solution() noexcept
 	if (!permutator.is_doubled()) {                                                   //
 		if (!permutator.next_operators_configuration()) goto sign_increase;           //
 	}
-	else {                                                                          //
+	else {                                                                            //
 		do permutator.next_operators_permutation(); while (permutator.is_doubled());  //
 		if (!permutator.are_poses_valid()) goto sign_increase;                        //
 	}
